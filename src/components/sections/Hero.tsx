@@ -10,13 +10,11 @@ export function Hero({ settings }: { settings: SiteData["settings"] }) {
       {/* Soft radial scrim so the title stays readable over the bubbles */}
       <div className="hero-scrim absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(56rem,92%)] h-[26rem] z-[5] pointer-events-none" />
 
-      {/* Centered hero copy (sits above the bubbles) */}
-      <div className="relative z-10 text-center max-w-3xl mx-auto">
-        <h1 className="font-headline font-bold text-[80px] leading-tight text-primary mb-6 tracking-tighter">
-          {settings.heroTitle}
-        </h1>
-        <p className="text-secondary font-headline text-[32px] leading-[40px] max-w-2xl mx-auto opacity-90">
-          {settings.heroSubtitle}
+      {/* Centered hero identity */}
+      <div className="relative z-10 text-center flex flex-col items-center gap-3">
+        <span className="text-5xl drop-shadow-[0_2px_12px_rgba(143,224,220,0.6)]">🌊</span>
+        <p className="font-headline font-semibold text-[22px] tracking-wide text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)] [text-shadow:0_0_24px_rgba(143,224,220,0.45)]">
+          Annvea Chung&nbsp;&nbsp;|&nbsp;&nbsp;Based in Toronto
         </p>
       </div>
     </section>
