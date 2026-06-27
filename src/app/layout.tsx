@@ -8,6 +8,7 @@ import {
   Space_Grotesk,
 } from "next/font/google";
 import "./globals.css";
+import { SmoothScroll } from "@/components/SmoothScroll";
 
 // Display / headlines — geometric, techy contrast against Geist Sans.
 const sora = Sora({
@@ -78,7 +79,10 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
         />
       </head>
-      <body className="font-body antialiased">{children}</body>
+      <body className="font-body antialiased">
+        <SmoothScroll />
+        {children}
+      </body>
     </html>
   );
 }

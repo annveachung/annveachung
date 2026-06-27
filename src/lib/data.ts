@@ -15,7 +15,7 @@ export async function getSiteData() {
     greetings,
     experiences,
     education,
-    skills,
+    treeNodes,
     visitedCountries,
     gallery,
   ] = await Promise.all([
@@ -25,7 +25,7 @@ export async function getSiteData() {
     prisma.greeting.findMany({ orderBy: { order: "asc" } }),
     prisma.experience.findMany({ orderBy: { order: "asc" } }),
     prisma.education.findMany({ orderBy: { order: "asc" } }),
-    prisma.skill.findMany({ orderBy: { order: "asc" } }),
+    prisma.skillTreeNode.findMany({ orderBy: { order: "asc" } }),
     prisma.visitedCountry.findMany({ orderBy: { order: "asc" } }),
     prisma.galleryImage.findMany({ orderBy: { order: "asc" } }),
   ]);
@@ -37,7 +37,7 @@ export async function getSiteData() {
     greetings,
     experiences,
     education,
-    skills,
+    treeNodes,
     visitedCountries,
     gallery,
   };

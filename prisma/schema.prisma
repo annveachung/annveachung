@@ -90,13 +90,18 @@ model Education {
   order       Int      @default(0)
 }
 
-// --- Skill Architecture nodes ------------------------------------------
+// --- Skill Tree nodes (living-CV progression graph) --------------------
 
-model Skill {
-  id    String @id @default(cuid())
-  icon  String @default("design_services")
-  label String
-  order Int    @default(0)
+model SkillTreeNode {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   @default("skill")     // education | experience | skill
+  period      String   @default("")          // year or range, e.g. "2018–2022"
+  description String   @default("")
+  status      String   @default("completed") // completed | learning | planned
+  // Parent node ids this node connects back toward the root. Empty = root.
+  parents     String[] @default([])
+  order       Int      @default(0)
 }
 
 // --- Visited countries (visited.json world map) ------------------------

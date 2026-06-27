@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+/* Lenis — physics-based smooth/inertia scrolling. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 /* ----------------------------------------------------------------------
    "Nocturnal Shoreline" theme — ported from the Google Stitch design
    tokens into Tailwind v4 @theme. Token names mirror the Stitch config so
@@ -190,6 +208,43 @@ body {
     border-color 0.35s ease,
     box-shadow 0.35s ease,
     background 0.35s ease;
+  position: relative;
+}
+
+/* Glowing ring that radiates outward on hover. The ::after mirrors the pill
+   shape and ripples outward (scale + fade), looping like a soft sonar pulse.
+   Transform/opacity only → GPU-cheap. */
+.bubble::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 2.5px solid rgba(143, 224, 220, 0.85);
+  box-shadow:
+    0 0 22px rgba(143, 224, 220, 0.6),
+    inset 0 0 14px rgba(143, 224, 220, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.bubble:hover::after {
+  animation: bubble-ring 1.9s ease-out infinite;
+}
+
+@keyframes bubble-ring {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.8);
+  }
 }
 
 .bubble:hover {
@@ -220,6 +275,9 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .bubble-float {
+    animation: none;
+  }
+  .bubble:hover::after {
     animation: none;
   }
 }
@@ -341,4 +399,86 @@ body {
     opacity: 1;
     transition: none;
   }
+}
+
+/* ----------------------------------------------------------------------
+   The Living CV — split timeline with animated spring spine
+   Animate via opacity / transform / stroke-dashoffset only → 60fps.
+---------------------------------------------------------------------- */
+
+/* Surface-variant tone — clearly distinct from hero (#0d1518), soft fade at edges. */
+.skilltree {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(35, 43, 46, 0.95) 6%,
+    rgba(35, 43, 46, 0.95) 94%,
+    transparent 100%
+  );
+}
+
+/* Faint aurora behind the section (<8% opacity). */
+@keyframes skilltree-aurora {
+  0% { transform: translate3d(-3%, 0, 0) scale(1.1); }
+  50% { transform: translate3d(3%, 2%, 0) scale(1.2); }
+  100% { transform: translate3d(-3%, 0, 0) scale(1.1); }
+}
+.skilltree-aurora {
+  background:
+    radial-gradient(45% 40% at 30% 25%, rgba(143, 224, 220, 0.8) 0%, transparent 60%),
+    radial-gradient(40% 38% at 72% 70%, rgba(255, 239, 192, 0.7) 0%, transparent 60%);
+  opacity: 0.06;
+  animation: skilltree-aurora 30s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* --- Spring spine --- */
+.spring-path {
+  fill: none;
+  stroke: url(#springGrad);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.skilltree.in-view .spring-path {
+  stroke-dashoffset: 0;
+}
+
+@keyframes spring-pulse {
+  0%, 100% { transform: scaleY(1); }
+  35% { transform: scaleY(0.964); }
+  68% { transform: scaleY(1.02); }
+}
+.skilltree.in-view .spring-group {
+  transform-origin: center top;
+  animation: spring-pulse 2.8s ease-in-out infinite;
+  animation-delay: 1.9s;
+}
+
+/* --- Timeline cards --- */
+.timeline-card {
+  opacity: 0;
+  transform: translateX(var(--slide-dir, -20px));
+  transition:
+    opacity 0.55s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.skilltree.in-view .timeline-card {
+  opacity: 1;
+  transform: translateX(0);
+}
+.timeline-card--left  { --slide-dir: -20px; }
+.timeline-card--right { --slide-dir:  20px; }
+
+.timeline-card:hover {
+  transform: scale(1.02) translateY(-2px) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skilltree-aurora { animation: none; }
+  .spring-path { stroke-dashoffset: 0; transition: none; }
+  .spring-group { animation: none; }
+  .timeline-card { opacity: 1; transform: none; transition: none; }
 }

@@ -1,8 +1,7 @@
 import { getSiteData } from "@/lib/data";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
-import { CoreModules } from "@/components/sections/CoreModules";
-import { SkillArchitecture } from "@/components/sections/SkillArchitecture";
+import { SkillTree } from "@/components/sections/SkillTree";
 import { GlobalMap } from "@/components/sections/GlobalMap";
 import { VisualLogs } from "@/components/sections/VisualLogs";
 import { Footer } from "@/components/sections/Footer";
@@ -15,8 +14,7 @@ export default async function Home() {
       <Navbar settings={data.settings} navLinks={data.navLinks} />
       <main>
         <Hero settings={data.settings} />
-        <CoreModules experiences={data.experiences} education={data.education} />
-        <SkillArchitecture skills={data.skills} />
+        <SkillTree nodes={data.treeNodes} />
         <GlobalMap
           settings={data.settings}
           visitedCountries={data.visitedCountries}

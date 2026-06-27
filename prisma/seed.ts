@@ -29,7 +29,7 @@ async function main() {
   await prisma.greeting.deleteMany();
   await prisma.experience.deleteMany();
   await prisma.education.deleteMany();
-  await prisma.skill.deleteMany();
+  await prisma.skillTreeNode.deleteMany();
   await prisma.visitedCountry.deleteMany();
   await prisma.galleryImage.deleteMany();
 
@@ -118,13 +118,100 @@ async function main() {
     ],
   });
 
-  // --- Skills (Skill Architecture) -------------------------------------
-  await prisma.skill.createMany({
+  // --- Skill Tree (living-CV progression graph) ------------------------
+  // Fixed ids so `parents` references resolve. Roots have empty parents.
+  await prisma.skillTreeNode.createMany({
     data: [
-      { icon: "design_services", label: "UI/UX Design", order: 0 },
-      { icon: "code", label: "Front-End", order: 1 },
-      { icon: "hub", label: "Systems", order: 2 },
-      { icon: "auto_videocam", label: "Motion", order: 3 },
+      {
+        id: "node-uoft",
+        title: "University of Toronto",
+        category: "education",
+        period: "2018 – 2022",
+        description: "Honours BSc, Computer Science & Cognitive Science.",
+        status: "completed",
+        parents: [],
+        order: 0,
+      },
+      {
+        id: "node-research",
+        title: "Research Assistant",
+        category: "experience",
+        period: "2021 – 2022",
+        description: "HCI lab — studied emotional resonance of fluid interfaces.",
+        status: "completed",
+        parents: ["node-uoft"],
+        order: 1,
+      },
+      {
+        id: "node-uiux",
+        title: "UI/UX Foundations",
+        category: "skill",
+        period: "2020",
+        description: "Interaction design, type, and visual systems.",
+        status: "completed",
+        parents: ["node-uoft"],
+        order: 2,
+      },
+      {
+        id: "node-frontend",
+        title: "Front-End Engineering",
+        category: "skill",
+        period: "2021",
+        description: "React, TypeScript, and design-systems work.",
+        status: "completed",
+        parents: ["node-uiux"],
+        order: 3,
+      },
+      {
+        id: "node-designer",
+        title: "Product Designer",
+        category: "experience",
+        period: "2022 – 2024",
+        description: "Shipped end-to-end product surfaces for a SaaS team.",
+        status: "completed",
+        parents: ["node-frontend", "node-research"],
+        order: 4,
+      },
+      {
+        id: "node-motion",
+        title: "Motion & Interaction",
+        category: "skill",
+        period: "2023",
+        description: "WebGL, SVG choreography, and micro-interactions.",
+        status: "completed",
+        parents: ["node-frontend"],
+        order: 5,
+      },
+      {
+        id: "node-academy",
+        title: "Global Tech Academy",
+        category: "education",
+        period: "Ongoing",
+        description: "Advanced systems architecture & distributed design.",
+        status: "learning",
+        parents: ["node-designer"],
+        order: 6,
+      },
+      {
+        id: "node-systems",
+        title: "Systems Design",
+        category: "skill",
+        period: "Now",
+        description: "Scaling resilient, human-centred systems.",
+        status: "learning",
+        parents: ["node-academy"],
+        order: 7,
+      },
+      {
+        id: "node-ai",
+        title: "Applied AI Interfaces",
+        category: "skill",
+        period: "Next",
+        description: "Designing calm, trustworthy AI-native experiences.",
+        status: "planned",
+        parents: ["node-systems", "node-motion"],
+        order: 8,
+      },
     ],
   });
 
