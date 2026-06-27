@@ -118,7 +118,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
-  const [springH, setSpringH] = useState(600);
+  const [springH, setSpringH] = useState(0);
   const [hover, setHover] = useState<Hover>(null);
 
   const eduNodes = nodes
@@ -215,28 +215,30 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
 
           {/* Spring spine */}
           <div className="relative flex justify-center">
-            <svg
-              width={80}
-              height={springH}
-              viewBox={`0 0 80 ${springH}`}
-              className="overflow-visible"
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="springGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ffefc0" stopOpacity="0.9" />
-                  <stop offset="50%" stopColor="#8fe0dc" stopOpacity="0.85" />
-                  <stop offset="100%" stopColor="#ffefc0" stopOpacity="0.9" />
-                </linearGradient>
-              </defs>
-              <g className="spring-group">
-                <path
-                  className="spring-path"
-                  d={sinePath(springH)}
-                  pathLength={1}
-                />
-              </g>
-            </svg>
+            {springH > 0 && (
+              <svg
+                width={80}
+                height={springH}
+                viewBox={`0 0 80 ${springH}`}
+                className="overflow-visible"
+                aria-hidden="true"
+              >
+                <defs>
+                  <linearGradient id="springGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ffefc0" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#8fe0dc" stopOpacity="0.85" />
+                    <stop offset="100%" stopColor="#ffefc0" stopOpacity="0.9" />
+                  </linearGradient>
+                </defs>
+                <g className="spring-group">
+                  <path
+                    className="spring-path"
+                    d={sinePath(springH)}
+                    pathLength={1}
+                  />
+                </g>
+              </svg>
+            )}
           </div>
 
           {/* Experience column */}
