@@ -482,3 +482,50 @@ body {
   .spring-group { animation: none; }
   .timeline-card { opacity: 1; transform: none; transition: none; }
 }
+
+/* ----------------------------------------------------------------------
+   Skills section — toolkit chips below The Living CV
+---------------------------------------------------------------------- */
+
+.skills-section {
+  background: linear-gradient(
+    to bottom,
+    rgba(35, 43, 46, 0.95) 0%,
+    rgba(28, 36, 39, 0.92) 94%,
+    transparent 100%
+  );
+}
+
+@keyframes skills-aurora {
+  0% { transform: translate3d(3%, 0, 0) scale(1.1); }
+  50% { transform: translate3d(-3%, 2%, 0) scale(1.18); }
+  100% { transform: translate3d(3%, 0, 0) scale(1.1); }
+}
+.skills-section-aurora {
+  background:
+    radial-gradient(42% 38% at 68% 22%, rgba(255, 239, 192, 0.7) 0%, transparent 60%),
+    radial-gradient(38% 42% at 28% 75%, rgba(143, 224, 220, 0.7) 0%, transparent 60%);
+  opacity: 0.055;
+  animation: skills-aurora 34s ease-in-out infinite;
+  will-change: transform;
+}
+
+.skill-chip {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
+}
+.skills-section.in-view .skill-chip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skills-section-aurora { animation: none; }
+  .skill-chip { opacity: 1; transform: none; transition: color 0.2s, border-color 0.2s; }
+}

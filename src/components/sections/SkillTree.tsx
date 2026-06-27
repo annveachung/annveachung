@@ -127,9 +127,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
   const expNodes = nodes
     .filter((n) => n.category === "experience")
     .sort((a, b) => a.order - b.order);
-  const skillNodes = nodes
-    .filter((n) => n.category === "skill")
-    .sort((a, b) => a.order - b.order);
+
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -256,19 +254,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
           </div>
         </div>
 
-        {/* Skill chips */}
-        {skillNodes.length > 0 && (
-          <div className="mt-10 flex flex-wrap gap-2 justify-center">
-            {skillNodes.map((n) => (
-              <span
-                key={n.id}
-                className="font-label text-[10px] tracking-[0.15em] uppercase px-3 py-1.5 rounded border border-secondary/30 text-secondary/75 bg-charcoal/50 backdrop-blur-sm"
-              >
-                {n.title}
-              </span>
-            ))}
-          </div>
-        )}
+
       </div>
 
       {/* Tooltip */}

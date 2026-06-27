@@ -2,6 +2,7 @@ import { getSiteData } from "@/lib/data";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { SkillTree } from "@/components/sections/SkillTree";
+import { Skills } from "@/components/sections/Skills";
 import { GlobalMap } from "@/components/sections/GlobalMap";
 import { VisualLogs } from "@/components/sections/VisualLogs";
 import { Footer } from "@/components/sections/Footer";
@@ -15,6 +16,7 @@ export default async function Home() {
       <main>
         <Hero settings={data.settings} />
         <SkillTree nodes={data.treeNodes} />
+        <Skills nodes={data.treeNodes} />
         <GlobalMap
           settings={data.settings}
           visitedCountries={data.visitedCountries}
