@@ -1,0 +1,233 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { geoMercator, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
+import type { SiteData } from "@/lib/data";
+
+// Standard Mercator — the familiar "wall map" / Google-Maps look. The
+// projection is fit to a fixed width and the viewBox is derived from the
+// projected bounds so proportions stay correct (no stretched continents).
+const W = 1000;
+const ANTARCTICA = "010"; // dropped for a cleaner silhouette
+
+type CountryPath = { code: string; name: string; d: string };
+
+type Hover = { name: string; x: number; y: number } | null;
+
+export function GlobalMap({
+  settings,
+  visitedCountries,
+}: {
+  settings: SiteData["settings"];
+  visitedCountries: SiteData["visitedCountries"];
+}) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [countries, setCountries] = useState<CountryPath[]>([]);
+  const [viewBox, setViewBox] = useState(`0 0 ${W} 600`);
+  const [inView, setInView] = useState(false);
+  const [hover, setHover] = useState<Hover>(null);
+
+  const visitedCodes = useMemo(
+    () => new Set(visitedCountries.map((c) => c.code)),
+    [visitedCountries],
+  );
+  // Per-country reveal index + breathing delay, computed once per data change.
+  // The breathing delay MUST be stable across renders — computing Math.random()
+  // inline during render re-randomizes it on every mousemove, which restarts
+  // every country's animation and makes them flicker.
+  const STAGGER = 0.14; // s between each visited country lighting up
+  const REVEAL_BASE = 0.6; // s transition duration
+  const visitedTiming = useMemo(() => {
+    const m = new Map<string, { revealDelay: number; breatheDelay: number }>();
+    const n = visitedCountries.length;
+    visitedCountries.forEach((c, i) => {
+      m.set(c.code, {
+        revealDelay: i * STAGGER,
+        // Breathing starts after the whole reveal finishes, plus a random
+        // offset so countries never pulse in unison.
+        breatheDelay: n * STAGGER + REVEAL_BASE + Math.random() * 5,
+      });
+    });
+    return m;
+  }, [visitedCountries]);
+
+  const visitedCount = visitedCountries.length;
+  const worldPct = Math.round((visitedCount / 177) * 100);
+
+  // Build the SVG country paths once from the local topojson.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/geo/countries-110m.json")
+      .then((r) => r.json())
+      .then((topo) => {
+        if (cancelled) return;
+        const fc = feature(
+          topo,
+          topo.objects.countries,
+        ) as FeatureCollection<Geometry, { name?: string }>;
+        const land: FeatureCollection<Geometry, { name?: string }> = {
+          type: "FeatureCollection",
+          features: fc.features.filter((f) => String(f.id) !== ANTARCTICA),
+        };
+
+        // Fit Mercator to the width, then size the viewBox to the projected
+        // bounds so the map fills the frame with correct proportions.
+        const projection = geoMercator().fitWidth(W, land);
+        const pathGen = geoPath(projection);
+        const [[x0, y0], [x1, y1]] = pathGen.bounds(land);
+        setViewBox(`${x0} ${y0} ${x1 - x0} ${y1 - y0}`);
+
+        const paths: CountryPath[] = land.features
+          .map((f: Feature, i) => ({
+            // A few features (e.g. Kosovo, Somaliland) have no id — fall back to
+            // a synthetic unique code so React keys stay unique. These are never
+            // "visited" (visited codes are numeric ISO ids), so they just render
+            // as unvisited.
+            code: f.id != null ? String(f.id) : `na-${i}`,
+            name: f.properties?.name ?? String(f.id ?? `na-${i}`),
+            d: pathGen(f) ?? "",
+          }))
+          .filter((c) => c.d);
+        setCountries(paths);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Kick off the reveal once the section scrolls into view (once only).
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      id="nodes"
+      className={`worldmap relative w-full bg-midnight overflow-hidden mb-xl border-y border-outline-variant/20 scroll-mt-32 ${
+        inView ? "in-view" : ""
+      }`}
+      onMouseLeave={() => setHover(null)}
+    >
+      {/* Subtle drifting radial-gradient depth layer (<8% opacity). */}
+      <div className="worldmap-bg pointer-events-none absolute inset-0" />
+
+      {/* Heading */}
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pt-12">
+        <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mb-2">
+          {settings.mapTitle}
+        </h2>
+        <p className="text-on-surface-variant max-w-[36rem]">{settings.mapSubtitle}</p>
+      </div>
+
+      {/* Map */}
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-margin-desktop pb-12 pt-6">
+        <svg
+          className="worldmap-svg w-full h-auto block"
+          viewBox={viewBox}
+          role="img"
+          aria-label={`World map highlighting ${visitedCount} visited countries`}
+        >
+          <defs>
+            {/* Visited fill — slight turquoise gradient. */}
+            <radialGradient id="visitedFill" cx="50%" cy="40%" r="75%">
+              <stop offset="0%" stopColor="#8fe3df" />
+              <stop offset="100%" stopColor="#5cc4c0" />
+            </radialGradient>
+            <radialGradient id="visitedFillHover" cx="50%" cy="40%" r="75%">
+              <stop offset="0%" stopColor="#bdf3f0" />
+              <stop offset="100%" stopColor="#70d6d2" />
+            </radialGradient>
+          </defs>
+
+          {/* Unvisited first (dark base), visited on top so glow isn't clipped. */}
+          {countries.map((c) => {
+            const isVisited = visitedCodes.has(c.code);
+            if (isVisited) return null;
+            return <path key={c.code} d={c.d} className="country" />;
+          })}
+
+          {countries.map((c) => {
+            if (!visitedCodes.has(c.code)) return null;
+            const t = visitedTiming.get(c.code);
+            return (
+              <path
+                key={c.code}
+                d={c.d}
+                className="country country--visited"
+                style={{
+                  transitionDelay: `${t?.revealDelay ?? 0}s`,
+                  animationDelay: `${t?.breatheDelay ?? 0}s`,
+                }}
+                onMouseEnter={(e) =>
+                  setHover({
+                    name: c.name,
+                    x: e.clientX,
+                    y: e.clientY,
+                  })
+                }
+                onMouseMove={(e) =>
+                  setHover({ name: c.name, x: e.clientX, y: e.clientY })
+                }
+                onMouseLeave={() => setHover(null)}
+              />
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Stats overlay — premium analytics feel. */}
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pb-12 -mt-4 flex flex-wrap items-end gap-4">
+        <div className="glass rounded-2xl px-6 py-4 border border-accent-turquoise/20 flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
+              Countries
+            </span>
+            <span className="font-headline font-bold text-3xl text-primary leading-none">
+              {visitedCount}
+            </span>
+          </div>
+          <div className="w-px h-10 bg-outline-variant/30" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
+              Of the world
+            </span>
+            <span className="font-headline font-bold text-3xl text-secondary leading-none">
+              {worldPct}%
+            </span>
+          </div>
+        </div>
+        <p className="text-[11px] font-label text-on-surface-variant/70 uppercase tracking-[0.2em] pb-1">
+          Hover a glowing country to explore
+        </p>
+      </div>
+
+      {/* Cursor-following tooltip */}
+      {hover && (
+        <div
+          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[140%] rounded-lg bg-charcoal/90 backdrop-blur-md border border-accent-turquoise/30 px-3 py-1.5 shadow-xl"
+          style={{ left: hover.x, top: hover.y }}
+        >
+          <span className="font-label text-xs text-primary whitespace-nowrap">
+            {hover.name}
+          </span>
+        </div>
+      )}
+    </section>
+  );
+}

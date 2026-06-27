@@ -1,0 +1,119 @@
+// Prisma schema for "Annvea's Soft Coastal Space"
+// Every public-page section is DB-backed so the admin panel can manage it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Auth ---------------------------------------------------------------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- Site-wide singleton (hero, nav brand, footer, map meta) -----------
+
+model SiteSettings {
+  id            Int    @id @default(1)
+  // Hero / brand
+  brandName     String @default("Annvea Chung")
+  heroTitle     String @default("Coastal Tech")
+  heroSubtitle  String @default("Architecting immersive digital experiences at the intersection of technical precision and artistic whimsy.")
+  ctaLabel      String @default("Connect")
+  ctaHref       String @default("#")
+  // visited.json world-map meta
+  mapTitle      String @default("visited.json")
+  mapSubtitle   String @default("Every country I've set foot in, gently illuminated — a quiet map of where the journey has taken me so far.")
+  mapFocus      String @default("Systems Synthesis")
+  mapLatency    String @default("24ms")
+  // Footer
+  footerTagline String @default("Built for the Nocturnal Shoreline")
+  updatedAt     DateTime @updatedAt
+}
+
+// --- Navigation links ---------------------------------------------------
+
+model NavLink {
+  id    String @id @default(cuid())
+  label String
+  href  String @default("#")
+  order Int    @default(0)
+}
+
+// --- Social / footer links ---------------------------------------------
+
+model SocialLink {
+  id    String @id @default(cuid())
+  label String
+  href  String @default("#")
+  order Int    @default(0)
+}
+
+// --- Language marquee greetings ----------------------------------------
+
+model Greeting {
+  id    String @id @default(cuid())
+  text  String
+  order Int    @default(0)
+}
+
+// --- Experience (Core Modules cards) -----------------------------------
+
+model Experience {
+  id          String   @id @default(cuid())
+  icon        String   @default("terminal") // Material Symbol name
+  badge       String   @default("")         // e.g. "Ongoing Research"
+  title       String
+  description String
+  tags        String[] @default([])
+  order       Int      @default(0)
+}
+
+// --- Education cards ----------------------------------------------------
+
+model Education {
+  id          String   @id @default(cuid())
+  icon        String   @default("compost")
+  badge       String   @default("")
+  title       String
+  description String
+  tags        String[] @default([])
+  order       Int      @default(0)
+}
+
+// --- Skill Architecture nodes ------------------------------------------
+
+model Skill {
+  id    String @id @default(cuid())
+  icon  String @default("design_services")
+  label String
+  order Int    @default(0)
+}
+
+// --- Visited countries (visited.json world map) ------------------------
+
+model VisitedCountry {
+  id    String @id @default(cuid())
+  // `code` = numeric ISO 3166-1 id matching the world-atlas topojson feature id.
+  code  String @unique
+  name  String
+  order Int    @default(0)
+}
+
+// --- Visual Logs gallery images ----------------------------------------
+
+model GalleryImage {
+  id      String @id @default(cuid())
+  url     String
+  caption String @default("")
+  order   Int    @default(0)
+}
