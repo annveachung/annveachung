@@ -3,7 +3,7 @@ import { FloatingLanguages } from "@/components/sections/FloatingLanguages";
 
 export function Hero({ settings }: { settings: SiteData["settings"] }) {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden px-margin-desktop">
+    <section className="nocturnal-gradient relative min-h-screen flex items-center justify-center overflow-hidden px-margin-desktop">
       {/* Packed field of floating greeting bubbles filling the hero */}
       <FloatingLanguages />
 

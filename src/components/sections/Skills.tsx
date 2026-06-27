@@ -43,7 +43,7 @@ export function Skills({ nodes }: { nodes: Node[] }) {
   return (
     <section
       ref={sectionRef}
-      id="nodes"
+      id="toolkit"
       className={`skills-section relative w-full overflow-hidden scroll-mt-20 ${inView ? "in-view" : ""}`}
     >
       <div className="skills-section-aurora pointer-events-none absolute inset-0" />

@@ -41,6 +41,7 @@ html.lenis body {
   --color-outline-variant: #4a463d;
   --color-midnight: #070f12;
   --color-charcoal: #192124;
+  --color-surface-deep: #141b1f;
 
   --font-headline: var(--font-sora), sans-serif;
   --font-body: var(--font-geist), sans-serif;
@@ -406,15 +407,17 @@ body {
    Animate via opacity / transform / stroke-dashoffset only → 60fps.
 ---------------------------------------------------------------------- */
 
-/* Surface-variant tone — clearly distinct from hero (#0d1518), soft fade at edges. */
+/*
+  Alternating section tones — all fade transparent at edges so sections bleed
+  into each other rather than cutting hard:
+    Tone A — surface-variant #232b2e — Living CV, Visual Logs
+    Tone B — mid-dark #141b1f       — Skills
+    GlobalMap keeps its own bg-midnight treatment
+*/
+
+/* Tone A: Living CV */
 .skilltree {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(35, 43, 46, 0.95) 6%,
-    rgba(35, 43, 46, 0.95) 94%,
-    transparent 100%
-  );
+  background-color: var(--color-surface-variant);
 }
 
 /* Faint aurora behind the section (<8% opacity). */
@@ -487,13 +490,14 @@ body {
    Skills section — toolkit chips below The Living CV
 ---------------------------------------------------------------------- */
 
+/* Tone B: Skills */
 .skills-section {
-  background: linear-gradient(
-    to bottom,
-    rgba(35, 43, 46, 0.95) 0%,
-    rgba(28, 36, 39, 0.92) 94%,
-    transparent 100%
-  );
+  background-color: var(--color-surface-deep);
+}
+
+/* Tone A: Visual Logs (mirrors Living CV — closes the alternating cycle) */
+.visual-logs {
+  background-color: var(--color-surface-variant);
 }
 
 @keyframes skills-aurora {

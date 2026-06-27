@@ -41,7 +41,7 @@ export function SmoothScroll() {
       debounce: 500,
     });
     snap.add(0); // Hero top
-    for (const id of ["skills", "nodes", "logs"]) {
+    for (const id of ["skills", "toolkit", "nodes", "logs"]) {
       const el = document.getElementById(id);
       if (el) snap.addElement(el, { align: ["start"] });
     }

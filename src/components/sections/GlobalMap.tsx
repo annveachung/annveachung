@@ -119,7 +119,7 @@ export function GlobalMap({
     <section
       ref={sectionRef}
       id="nodes"
-      className={`worldmap relative w-full bg-midnight overflow-hidden mb-xl border-y border-outline-variant/20 scroll-mt-32 ${
+      className={`worldmap relative w-full bg-midnight overflow-hidden scroll-mt-32 ${
         inView ? "in-view" : ""
       }`}
       onMouseLeave={() => setHover(null)}
