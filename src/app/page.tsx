@@ -1,7 +1,6 @@
 import { getSiteData } from "@/lib/data";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
-import { GreetingMarquee } from "@/components/sections/GreetingMarquee";
 import { CoreModules } from "@/components/sections/CoreModules";
 import { SkillArchitecture } from "@/components/sections/SkillArchitecture";
 import { GlobalMap } from "@/components/sections/GlobalMap";
@@ -14,9 +13,8 @@ export default async function Home() {
   return (
     <div className="nocturnal-gradient min-h-screen">
       <Navbar settings={data.settings} navLinks={data.navLinks} />
-      <main className="pt-40">
+      <main>
         <Hero settings={data.settings} />
-        <GreetingMarquee greetings={data.greetings} />
         <CoreModules experiences={data.experiences} education={data.education} />
         <SkillArchitecture skills={data.skills} />
         <GlobalMap

@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
-import { Sora, Geist, Geist_Mono } from "next/font/google";
+import {
+  Sora,
+  Geist,
+  Geist_Mono,
+  Playfair_Display,
+  Caveat,
+  Space_Grotesk,
+} from "next/font/google";
 import "./globals.css";
 
 // Display / headlines — geometric, techy contrast against Geist Sans.
@@ -27,6 +34,30 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+// Extra typefaces for the packed greeting bubbles — an elegant serif, a
+// handwriting script, and a geometric grotesque give the field its variety.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "700"],
+  variable: "--font-caveat",
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Annvea Chung | Nocturnal Shoreline Tech",
   description:
@@ -37,7 +68,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${geist.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${sora.variable} ${geist.variable} ${geistMono.variable} ${playfair.variable} ${caveat.variable} ${spaceGrotesk.variable}`}
+    >
       <head>
         <link
           rel="stylesheet"

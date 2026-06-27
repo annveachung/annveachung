@@ -9,13 +9,13 @@
   --color-background: #0d1518;
   --color-surface: #151d20;
   --color-surface-variant: #232b2e;
-  --color-primary: #ffe9a8; /* buttery / creamy yellow */
+  --color-primary: #ffefc0; /* pastel buttery yellow */
   --color-on-primary: #201b0a;
-  --color-secondary: #70d6d2; /* soft turquoise */
+  --color-secondary: #8fe0dc; /* pastel turquoise */
   --color-on-secondary: #003736;
-  --color-accent-turquoise: #70d6d2;
-  --color-fluo: #70d6d2; /* fluorescent turquoise accent */
-  --color-fluo-yellow: #fff0a0; /* occasional fluorescent buttery accent */
+  --color-accent-turquoise: #8fe0dc;
+  --color-fluo: #8fe0dc; /* fluorescent pastel turquoise accent */
+  --color-fluo-yellow: #fff4c4; /* occasional fluorescent buttery accent */
   --color-on-background: #dbe4e8;
   --color-on-surface: #dbe4e8;
   --color-on-surface-variant: #ccc6ba;
@@ -67,17 +67,17 @@
   0% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(112, 214, 210, 0.7);
+    box-shadow: 0 0 0 0 rgba(143, 224, 220, 0.7);
   }
   70% {
     transform: scale(1.1);
     opacity: 0.8;
-    box-shadow: 0 0 0 10px rgba(112, 214, 210, 0);
+    box-shadow: 0 0 0 10px rgba(143, 224, 220, 0);
   }
   100% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(112, 214, 210, 0);
+    box-shadow: 0 0 0 0 rgba(143, 224, 220, 0);
   }
 }
 
@@ -92,17 +92,17 @@ body {
   background: rgba(25, 33, 36, 0.6);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(112, 214, 210, 0.15);
+  border: 1px solid rgba(143, 224, 220, 0.15);
 }
 
 .glow-turquoise {
-  box-shadow: 0 10px 40px rgba(112, 214, 210, 0.1);
+  box-shadow: 0 10px 40px rgba(143, 224, 220, 0.1);
 }
 
 .nocturnal-gradient {
   background:
-    radial-gradient(circle at top right, rgba(112, 214, 210, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at bottom left, rgba(255, 233, 168, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at top right, rgba(143, 224, 220, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at bottom left, rgba(255, 239, 192, 0.05) 0%, transparent 40%),
     var(--color-background);
 }
 
@@ -136,6 +136,95 @@ body {
 }
 
 /* ----------------------------------------------------------------------
+   Hero — packed field of floating greeting bubbles (glassmorphism)
+   CSS-driven float (transform only) so 50+ bubbles stay at 60fps.
+---------------------------------------------------------------------- */
+
+/* Static centering anchor — the float animation lives on the inner element so
+   it composes cleanly with this translate. */
+.bubble-anchor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+.bubble-float {
+  animation: bubble-float var(--dur, 12s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform;
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--r0, 0deg));
+  }
+  50% {
+    transform: translate3d(var(--dx, 0px), var(--dy, -10px), 0) rotate(var(--r1, 0deg));
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--r0, 0deg));
+  }
+}
+
+.bubble {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 9999px;
+  padding: 0.42em 0.92em;
+  line-height: 1;
+  color: var(--color-on-surface);
+  cursor: pointer;
+  user-select: none;
+  /* semi-transparent glass + light blur (kept modest for many bubbles) */
+  background: rgba(25, 33, 36, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  /* thin cream (buttery) border + slight turquoise inner highlight */
+  border: 1px solid rgba(255, 239, 192, 0.3);
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.22),
+    inset 0 0 10px rgba(143, 224, 220, 0.1);
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+.bubble:hover {
+  transform: scale(1.14);
+  border-color: rgba(255, 239, 192, 0.85);
+  background: rgba(30, 40, 43, 0.55);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    inset 0 0 16px rgba(143, 224, 220, 0.22),
+    0 0 20px rgba(143, 224, 220, 0.28);
+  z-index: 20;
+}
+
+.bubble:active {
+  transform: scale(1.05);
+}
+
+/* Soft radial scrim behind the centered hero copy so it stays readable over
+   the packed bubble field. */
+.hero-scrim {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(13, 21, 24, 0.92) 0%,
+    rgba(13, 21, 24, 0.72) 42%,
+    transparent 72%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble-float {
+    animation: none;
+  }
+}
+
+/* ----------------------------------------------------------------------
    visited.json — premium interactive world map
    SVG only; animate via opacity / transform / CSS drop-shadow (no SVG
    filter primitives) for smooth 60fps. Warm + subtle, never neon.
@@ -156,8 +245,8 @@ body {
 
 .worldmap-bg {
   background:
-    radial-gradient(40% 50% at 22% 30%, rgba(112, 214, 210, 0.9) 0%, transparent 60%),
-    radial-gradient(38% 46% at 78% 68%, rgba(255, 233, 168, 0.7) 0%, transparent 60%);
+    radial-gradient(40% 50% at 22% 30%, rgba(143, 224, 220, 0.9) 0%, transparent 60%),
+    radial-gradient(38% 46% at 78% 68%, rgba(255, 239, 192, 0.7) 0%, transparent 60%);
   opacity: 0.07;
   animation: worldmap-bg-drift 28s ease-in-out infinite;
   will-change: transform;
@@ -177,11 +266,11 @@ body {
 /* Visited countries — turquoise gradient fill, thin cream outline, soft glow */
 .country--visited {
   fill: url(#visitedFill);
-  stroke: #ffe9a8;
+  stroke: #ffefc0;
   stroke-width: 0.5;
   transform-box: fill-box;
   transform-origin: center;
-  filter: drop-shadow(0 0 1.5px rgba(112, 214, 210, 0.55));
+  filter: drop-shadow(0 0 1.5px rgba(143, 224, 220, 0.55));
   transition:
     fill 0.4s ease,
     filter 0.45s ease,
@@ -194,11 +283,11 @@ body {
   0%,
   100% {
     opacity: 0.82;
-    filter: drop-shadow(0 0 1.5px rgba(112, 214, 210, 0.45));
+    filter: drop-shadow(0 0 1.5px rgba(143, 224, 220, 0.45));
   }
   50% {
     opacity: 1;
-    filter: drop-shadow(0 0 4px rgba(112, 214, 210, 0.7));
+    filter: drop-shadow(0 0 4px rgba(143, 224, 220, 0.7));
   }
 }
 
@@ -222,7 +311,7 @@ body {
 /* Hover — brighten, stronger glow, gentle scale-up. Overrides breathing. */
 .worldmap .country--visited:hover {
   fill: url(#visitedFillHover);
-  filter: drop-shadow(0 0 6px rgba(112, 214, 210, 0.95));
+  filter: drop-shadow(0 0 6px rgba(143, 224, 220, 0.95));
   transform: scale(1.04);
   animation: none;
   opacity: 1;

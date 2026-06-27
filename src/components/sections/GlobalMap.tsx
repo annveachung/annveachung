@@ -146,12 +146,12 @@ export function GlobalMap({
           <defs>
             {/* Visited fill — slight turquoise gradient. */}
             <radialGradient id="visitedFill" cx="50%" cy="40%" r="75%">
-              <stop offset="0%" stopColor="#8fe3df" />
-              <stop offset="100%" stopColor="#5cc4c0" />
+              <stop offset="0%" stopColor="#aeece8" />
+              <stop offset="100%" stopColor="#82d8d4" />
             </radialGradient>
             <radialGradient id="visitedFillHover" cx="50%" cy="40%" r="75%">
-              <stop offset="0%" stopColor="#bdf3f0" />
-              <stop offset="100%" stopColor="#70d6d2" />
+              <stop offset="0%" stopColor="#d4f6f4" />
+              <stop offset="100%" stopColor="#8fe0dc" />
             </radialGradient>
           </defs>
 
