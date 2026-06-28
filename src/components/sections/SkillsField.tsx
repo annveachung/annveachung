@@ -105,28 +105,35 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       layout(s.w, s.h);
     }
 
-    // --- Field height at a point ----------------------------------------
-    function fh(px: number, py: number, t: number) {
-      // Slow undulation
-      let v = 0.13 * Math.sin(px / 165 + t * 0.00027) * Math.cos(py / 210 + t * 0.00022);
-      // Gravity wells from nodes
+    // --- Grid displacement: radial warp around nodes --------------------
+    function gridDisplace(px: number, py: number, t: number): [number, number] {
+      let ddx = 0, ddy = 0;
       for (const n of s.nodes) {
-        const dx = px - n.x, dy = py - n.y;
-        v -= 0.88 * Math.exp(-(dx*dx + dy*dy) / (2 * SIGMA * SIGMA));
+        const rx = px - n.x, ry = py - n.y;
+        const dist2 = rx*rx + ry*ry;
+        const wt = Math.exp(-dist2 / (2 * SIGMA * SIGMA));
+        // Gradient of Gaussian: pulls radially inward, zero at centre, peaks at r=SIGMA
+        ddx -= 34 * rx / SIGMA * wt;
+        ddy -= 34 * ry / SIGMA * wt;
       }
-      // Ripple waves
+      // Ripple: radially outward wave
       for (const rip of s.ripples) {
-        const age  = t - rip.born;
-        const prog = age / rip.dur;
+        const age = t - rip.born, prog = age / rip.dur;
         if (prog >= 1) continue;
-        const dx   = px - rip.cx, dy = py - rip.cy;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const rx = px - rip.cx, ry = py - rip.cy;
+        const dist = Math.sqrt(rx*rx + ry*ry);
+        if (dist < 1) continue;
         const front = prog * rip.maxR;
         const diff  = dist - front;
-        if (Math.abs(diff) < 72)
-          v += Math.sin(diff * 0.088) * (1 - prog) * 0.38 * Math.exp(-dist / (rip.maxR * 0.62));
+        if (Math.abs(diff) < 72) {
+          const amp = Math.sin(diff * 0.088) * (1 - prog) * 9 * Math.exp(-dist / (rip.maxR * 0.62));
+          ddx += amp * rx / dist;
+          ddy += amp * ry / dist;
+        }
       }
-      return v;
+      // Gentle vertical undulation
+      ddy += 4 * Math.sin(px / 165 + t * 0.00027) * Math.cos(py / 210 + t * 0.00022);
+      return [ddx, ddy];
     }
 
     // --- Physics tick ---------------------------------------------------
@@ -201,29 +208,42 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(4,9,12,0.68)");
       ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
 
-      // --- Deformable dot lattice ---
+      // --- Deformable line grid (convex spacetime curvature) ---
       const GX = 36, GY = 22;
       const cw = w / GX, ch = h / GY;
-      const EPS = 3.8;
+      const STEPS_H = 72;
+      const STEPS_V = 46;
 
-      for (let ix = 0; ix <= GX; ix++) {
-        for (let iy = 0; iy <= GY; iy++) {
-          const bx = ix * cw, by = iy * ch;
-          const fC = fh(bx, by, t);
-          // Numerical gradient → displacement direction
-          const gx = (fh(bx + EPS, by, t) - fC) / EPS;
-          const gy = (fh(bx, by + EPS, t) - fC) / EPS;
-          const D  = 17;
-          const px = bx - gx * D;
-          const py = by - gy * D;
-          // Brightness encodes depth
-          const brightness = 0.48 + fC * 0.42;
-          const opa = Math.max(0.012, Math.min(0.13, 0.04 + brightness * 0.1));
-          ctx.beginPath();
-          ctx.arc(px, py, 1.25, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(155,210,222,${opa.toFixed(3)})`;
-          ctx.fill();
+      ctx.lineWidth = 0.65;
+
+      // Horizontal lines
+      for (let iy = 0; iy <= GY; iy++) {
+        const byBase = iy * ch;
+        let prox = 0;
+        for (const n of nodes) { const dy = byBase - n.y; prox += 0.88 * Math.exp(-dy*dy / (2*SIGMA*SIGMA)); }
+        ctx.strokeStyle = `rgba(155,210,222,${Math.min(0.10, 0.055 + prox * 0.028).toFixed(3)})`;
+        ctx.beginPath();
+        for (let si = 0; si <= STEPS_H; si++) {
+          const bx = (si / STEPS_H) * w;
+          const [dx, dy] = gridDisplace(bx, byBase, t);
+          si === 0 ? ctx.moveTo(bx + dx, byBase + dy) : ctx.lineTo(bx + dx, byBase + dy);
         }
+        ctx.stroke();
+      }
+
+      // Vertical lines
+      for (let ix = 0; ix <= GX; ix++) {
+        const bxBase = ix * cw;
+        let prox = 0;
+        for (const n of nodes) { const dx = bxBase - n.x; prox += 0.88 * Math.exp(-dx*dx / (2*SIGMA*SIGMA)); }
+        ctx.strokeStyle = `rgba(155,210,222,${Math.min(0.10, 0.055 + prox * 0.028).toFixed(3)})`;
+        ctx.beginPath();
+        for (let si = 0; si <= STEPS_V; si++) {
+          const by = (si / STEPS_V) * h;
+          const [dx, dy] = gridDisplace(bxBase, by, t);
+          si === 0 ? ctx.moveTo(bxBase + dx, by + dy) : ctx.lineTo(bxBase + dx, by + dy);
+        }
+        ctx.stroke();
       }
 
       // --- Ripple rings ---
