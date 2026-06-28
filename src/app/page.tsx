@@ -27,7 +27,7 @@ export default async function Home() {
         />
         <div aria-hidden className="h-40 bg-gradient-to-b from-[#232b2e] to-[#141b1f]" />
         <VisualLogs gallery={data.gallery} />
-        <div aria-hidden className="h-8 bg-gradient-to-b from-surface-deep to-surface-variant" />
+        <div aria-hidden className="h-20 bg-gradient-to-b from-[#141b1f] to-[#232b2e]" />
         <Connect settings={data.settings} socialLinks={data.socialLinks} />
       </main>
     </div>

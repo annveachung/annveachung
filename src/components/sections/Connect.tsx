@@ -8,7 +8,7 @@ export function Connect({
   socialLinks: SiteData["socialLinks"];
 }) {
   return (
-    <section id="contact" className="glass-sweep bg-surface-variant w-full py-10 scroll-mt-20">
+    <section id="contact" className="glass-sweep bg-surface-variant w-full pt-5 pb-10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-margin-desktop flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
           <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
