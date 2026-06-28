@@ -601,9 +601,9 @@ body {
   background-color: var(--color-surface-deep);
 }
 
-/* Tone A: Visual Logs (mirrors Living CV — closes the alternating cycle) */
+/* Tone B: Visual Logs — darker, alternates with Map (Tone A) */
 .visual-logs {
-  background-color: var(--color-surface-variant);
+  background-color: #141b1f;
 }
 
 @keyframes skills-aurora {

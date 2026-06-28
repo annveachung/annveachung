@@ -20,14 +20,14 @@ export default async function Home() {
         <SkillTree nodes={data.treeNodes} />
         <div aria-hidden className="h-24 bg-gradient-to-b from-surface-variant to-surface-deep" />
         <Skills nodes={data.treeNodes} />
-        <div aria-hidden className="h-24 bg-gradient-to-b from-surface-deep to-midnight" />
+        <div aria-hidden className="h-40 bg-gradient-to-b from-[#141b1f] to-[#232b2e]" />
         <GlobalMap
           settings={data.settings}
           visitedCountries={data.visitedCountries}
         />
-        <div aria-hidden className="h-24 bg-gradient-to-b from-midnight to-surface-variant" />
+        <div aria-hidden className="h-40 bg-gradient-to-b from-[#232b2e] to-[#141b1f]" />
         <VisualLogs gallery={data.gallery} />
-        <div aria-hidden className="h-8 bg-gradient-to-b from-surface-variant to-surface-deep" />
+        <div aria-hidden className="h-8 bg-gradient-to-b from-surface-deep to-surface-variant" />
         <Connect settings={data.settings} socialLinks={data.socialLinks} />
       </main>
     </div>

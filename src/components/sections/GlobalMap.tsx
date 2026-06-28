@@ -119,7 +119,7 @@ export function GlobalMap({
     <section
       ref={sectionRef}
       id="nodes"
-      className={`worldmap relative w-full bg-midnight overflow-hidden scroll-mt-32 ${
+      className={`worldmap relative w-full bg-surface-variant overflow-hidden scroll-mt-32 ${
         inView ? "in-view" : ""
       }`}
       onMouseLeave={() => setHover(null)}
@@ -129,13 +129,25 @@ export function GlobalMap({
 
       {/* Heading */}
       <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pt-12">
-        <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
-          Whereabouts
-        </span>
-        <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mb-2 mt-2">
-          The Map So Far
-        </h2>
-        <p className="text-on-surface-variant max-w-[36rem]">A growing record of countries explored and horizons chased.</p>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+              Whereabouts
+            </span>
+            <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mt-2">
+              The Map So Far
+            </h2>
+          </div>
+          <div className="text-right flex flex-col items-end pb-1">
+            <span className="font-headline font-bold text-[48px] leading-[52px] text-secondary">
+              {worldPct}%
+            </span>
+            <span className="font-label text-[11px] tracking-[0.25em] uppercase text-on-surface-variant">
+              of the world
+            </span>
+          </div>
+        </div>
+        <p className="text-on-surface-variant max-w-[36rem] mt-2">A growing record of countries explored and horizons chased.</p>
       </div>
 
       {/* Map */}
@@ -192,32 +204,6 @@ export function GlobalMap({
             );
           })}
         </svg>
-      </div>
-
-      {/* Stats overlay — premium analytics feel. */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pb-12 -mt-4 flex flex-wrap items-end gap-4">
-        <div className="glass rounded-2xl px-6 py-4 border border-accent-turquoise/20 flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
-              Countries
-            </span>
-            <span className="font-headline font-bold text-3xl text-primary leading-none">
-              {visitedCount}
-            </span>
-          </div>
-          <div className="w-px h-10 bg-outline-variant/30" />
-          <div className="flex flex-col">
-            <span className="text-[10px] font-label text-on-surface-variant uppercase tracking-widest mb-1">
-              Of the world
-            </span>
-            <span className="font-headline font-bold text-3xl text-secondary leading-none">
-              {worldPct}%
-            </span>
-          </div>
-        </div>
-        <p className="text-[11px] font-label text-on-surface-variant/70 uppercase tracking-[0.2em] pb-1">
-          Hover a glowing country to explore
-        </p>
       </div>
 
       {/* Cursor-following tooltip */}

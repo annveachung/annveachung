@@ -7,7 +7,7 @@ export function VisualLogs({ gallery }: { gallery: SiteData["gallery"] }) {
   const items = [...gallery, ...gallery];
 
   return (
-    <section id="logs" className="visual-logs w-full scroll-mt-32">
+    <section id="logs" className="visual-logs w-full scroll-mt-32 pt-10 bg-[#141b1f]">
       <div className="max-w-7xl mx-auto px-margin-desktop mb-8 flex justify-between items-end">
         <div>
           <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
