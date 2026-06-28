@@ -24,7 +24,7 @@ export function VisualLogs({ gallery }: { gallery: SiteData["gallery"] }) {
           View All Entries
         </button>
       </div>
-      <div className="w-full overflow-hidden pb-12">
+      <div className="w-full overflow-hidden pb-2">
         <div className="marquee">
           <div className="marquee-content flex">
             {items.map((img, i) => (
