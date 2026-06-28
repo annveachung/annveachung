@@ -36,11 +36,11 @@ async function main() {
   // --- Nav links --------------------------------------------------------
   await prisma.navLink.createMany({
     data: [
-      { label: "Experience", href: "#experience", order: 0 },
-      { label: "Skills", href: "#skills", order: 1 },
-      { label: "Status", href: "#status", order: 2 },
-      { label: "Nodes", href: "#nodes", order: 3 },
-      { label: "Logs", href: "#logs", order: 4 },
+      { label: "Experience", href: "#skills",  order: 0 },
+      { label: "Skills",     href: "#toolkit", order: 1 },
+      { label: "Travelled",  href: "#nodes",   order: 2 },
+      { label: "Gallery",    href: "#logs",    order: 3 },
+      { label: "Connect",    href: "#contact", order: 4 },
     ],
   });
 

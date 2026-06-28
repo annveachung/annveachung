@@ -125,6 +125,36 @@ body {
     /* inner bottom depth line */ inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
+/* Individual nav link pills — rest state is dim; hover elevates into glass */
+.nav-link {
+  display: inline-block;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(219, 228, 232, 0.5);
+  box-shadow: none;
+  transition:
+    background      0.2s ease,
+    border-color    0.2s ease,
+    box-shadow      0.2s ease,
+    color           0.2s ease;
+}
+
+.nav-link:hover {
+  /* Bright frosted pill that clearly reads as elevated above the bar */
+  background: rgba(255, 255, 255, 0.13);
+  /* Crisper border — visible white rim, like a glass edge catching light */
+  border-color: rgba(255, 255, 255, 0.22);
+  /* Full brightness text */
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow:
+    /* lifted ambient shadow  */ 0 6px 20px rgba(0, 0, 0, 0.5),
+    /* tight contact shadow   */ 0 1px 4px  rgba(0, 0, 0, 0.35),
+    /* specular top highlight */ inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    /* inner bottom depth     */ inset 0 -1px 0 rgba(0, 0, 0, 0.22);
+}
+
 /* CTA pill — slightly lighter frosted surface to layer above the bar */
 .navbar-cta {
   background: rgba(143, 224, 220, 0.10);

@@ -13,12 +13,12 @@ export function Navbar({
         <span className="font-headline text-[17px] font-semibold text-primary tracking-tight">
           {settings.brandName}
         </span>
-        <div className="hidden md:flex gap-6 items-center">
+        <div className="hidden md:flex gap-1 items-center">
           {navLinks.map((link) => (
             <a
               key={link.id}
               href={link.href}
-              className="font-label text-[11px] tracking-[0.08em] uppercase text-on-surface-variant/80 hover:text-on-surface transition-colors duration-200"
+              className="nav-link font-label text-[11px] tracking-[0.08em] uppercase"
             >
               {link.label}
             </a>
