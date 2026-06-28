@@ -171,10 +171,10 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
           Progression
         </span>
         <h2 className="font-headline font-bold text-[40px] leading-tight text-primary mt-2">
-          The Living CV
+          Where I've Been, What I've Done
         </h2>
         <p className="text-on-surface-variant max-w-[36rem] mt-2">
-          Education, experience, and skills — chronological and clear.
+          An evolving path of education, experience, and everything in between.
         </p>
       </div>
 

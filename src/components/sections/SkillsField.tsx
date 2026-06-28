@@ -254,12 +254,12 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.font = `500 11px -apple-system,"SF Pro Text",sans-serif`;
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.28em";
       ctx.fillStyle = "rgba(143,224,220,0.65)";
-      ctx.fillText("TOOLKIT", 40, 96);
+      ctx.fillText("ARSENAL", 40, 96);
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
       // "Skill Field" heading
       ctx.font = `700 40px -apple-system,"SF Pro Display",sans-serif`;
       ctx.fillStyle = "rgba(255,239,192,0.92)";
-      ctx.fillText("Skill Field", 40, 116);
+      ctx.fillText("What I Work With", 40, 116);
       // Subtitle
       ctx.font = `400 13px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";

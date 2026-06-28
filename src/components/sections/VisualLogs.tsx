@@ -10,11 +10,14 @@ export function VisualLogs({ gallery }: { gallery: SiteData["gallery"] }) {
     <section id="logs" className="visual-logs w-full scroll-mt-32">
       <div className="max-w-7xl mx-auto px-margin-desktop mb-8 flex justify-between items-end">
         <div>
-          <h2 className="font-headline font-bold text-[32px] leading-[40px] text-primary">
-            Visual Logs
+          <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+            Gallery
+          </span>
+          <h2 className="font-headline font-bold text-[32px] leading-[40px] text-primary mt-2">
+            Archive of Little Things
           </h2>
           <p className="text-on-surface-variant">
-            Glimpses of a journey through tech and travel.
+            Paused moments from a moving life.
           </p>
         </div>
         <button className="text-secondary font-label text-[11px] tracking-[0.1em] uppercase border border-accent-turquoise/40 px-6 py-2 rounded-full hover:bg-accent-turquoise/10 hover:border-accent-turquoise transition-all">

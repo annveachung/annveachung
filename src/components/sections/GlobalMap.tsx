@@ -129,10 +129,13 @@ export function GlobalMap({
 
       {/* Heading */}
       <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pt-12">
-        <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mb-2">
-          {settings.mapTitle}
+        <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+          Whereabouts
+        </span>
+        <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mb-2 mt-2">
+          The Map So Far
         </h2>
-        <p className="text-on-surface-variant max-w-[36rem]">{settings.mapSubtitle}</p>
+        <p className="text-on-surface-variant max-w-[36rem]">A growing record of countries explored and horizons chased.</p>
       </div>
 
       {/* Map */}
