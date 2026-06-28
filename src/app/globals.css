@@ -107,6 +107,46 @@ body {
 }
 
 /* ----------------------------------------------------------------------
+   Glass sweep — a single light-beam that crosses the element on hover.
+   Apply .glass-sweep to any container. overflow:hidden clips the beam
+   to the element's shape (including border-radius).
+---------------------------------------------------------------------- */
+
+@keyframes glass-sweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateX(210%) skewX(-15deg); opacity: 0; }
+}
+
+.glass-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent       0%,
+    rgba(255,255,255,0.04) 35%,
+    rgba(255,255,255,0.11) 50%,
+    rgba(255,255,255,0.04) 65%,
+    transparent       100%
+  );
+  transform: translateX(-100%) skewX(-15deg);
+  opacity: 0;
+}
+
+.glass-sweep:hover::after {
+  animation: glass-sweep 680ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ----------------------------------------------------------------------
    Apple-inspired frosted glass navbar
    — strong backdrop blur, layered depth, no loud colors
 ---------------------------------------------------------------------- */
@@ -580,22 +620,6 @@ body {
   will-change: transform;
 }
 
-.skill-chip {
-  opacity: 0;
-  transform: translateY(8px);
-  transition:
-    opacity 0.4s ease,
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.25s ease,
-    background 0.25s ease,
-    color 0.25s ease;
-}
-.skills-section.in-view .skill-chip {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .skills-section-aurora { animation: none; }
-  .skill-chip { opacity: 1; transform: none; transition: color 0.2s, border-color 0.2s; }
 }

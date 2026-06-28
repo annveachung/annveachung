@@ -8,7 +8,7 @@ export function Connect({
   socialLinks: SiteData["socialLinks"];
 }) {
   return (
-    <section id="contact" className="bg-surface-deep w-full py-10 scroll-mt-20">
+    <section id="contact" className="glass-sweep bg-surface-deep w-full py-10 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-margin-desktop flex flex-col sm:flex-row items-center justify-between gap-6">
         <span className="font-headline font-bold text-2xl text-primary">
           {settings.ctaLabel}

@@ -9,7 +9,7 @@ export function Navbar({
 }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex justify-center w-full">
-      <nav className="navbar-frosted mt-5 mx-auto w-fit flex items-center gap-8 px-6 py-3 rounded-full">
+      <nav className="navbar-frosted glass-sweep mt-5 mx-auto w-fit flex items-center gap-8 px-6 py-3 rounded-full">
         <span className="font-headline text-[17px] font-semibold text-primary tracking-tight">
           {settings.brandName}
         </span>
