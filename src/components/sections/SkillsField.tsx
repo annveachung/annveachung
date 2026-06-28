@@ -192,7 +192,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
       // Background
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#0b1417";
+      ctx.fillStyle = "#141b1f";
       ctx.fillRect(0, 0, w, h);
 
       // Aurora blobs (match site palette)
@@ -245,6 +245,26 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         }
         ctx.stroke();
       }
+
+      // --- Section title ---
+      ctx.save();
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      // "Toolkit" label
+      ctx.font = `500 11px -apple-system,"SF Pro Text",sans-serif`;
+      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.28em";
+      ctx.fillStyle = "rgba(143,224,220,0.65)";
+      ctx.fillText("TOOLKIT", 40, 96);
+      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
+      // "Skill Field" heading
+      ctx.font = `700 40px -apple-system,"SF Pro Display",sans-serif`;
+      ctx.fillStyle = "rgba(255,239,192,0.92)";
+      ctx.fillText("Skill Field", 40, 116);
+      // Subtitle
+      ctx.font = `400 13px -apple-system,"SF Pro Text",sans-serif`;
+      ctx.fillStyle = "rgba(203,212,218,0.45)";
+      ctx.fillText("Drag any node to rearrange — the field responds.", 40, 166);
+      ctx.restore();
 
       // --- Ripple rings ---
       for (const rip of ripples) {
@@ -337,6 +357,19 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         }
       }
 
+      // --- Edge fades: blend canvas into neighbouring sections ---
+      const topFade = ctx.createLinearGradient(0, 0, 0, 96);
+      topFade.addColorStop(0, "#141b1f");
+      topFade.addColorStop(1, "rgba(20,27,31,0)");
+      ctx.fillStyle = topFade;
+      ctx.fillRect(0, 0, w, 96);
+
+      const botFade = ctx.createLinearGradient(0, h - 96, 0, h);
+      botFade.addColorStop(0, "rgba(20,27,31,0)");
+      botFade.addColorStop(1, "#141b1f");
+      ctx.fillStyle = botFade;
+      ctx.fillRect(0, h - 96, w, 96);
+
       ctx.restore();
     }
 
@@ -418,7 +451,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     <canvas
       ref={cvs}
       className="w-full block"
-      style={{ height: "520px", touchAction: "none" }}
+      style={{ height: "600px", touchAction: "none" }}
     />
   );
 }
