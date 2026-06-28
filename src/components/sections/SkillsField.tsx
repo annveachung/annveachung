@@ -247,23 +247,22 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       }
 
       // --- Section title ---
+      // Mirror the max-w-7xl mx-auto px-margin-desktop layout used by all other sections.
+      const titleX = Math.max(64, (w - 1280) / 2 + 64);
       ctx.save();
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
-      // "Toolkit" label
       ctx.font = `500 11px -apple-system,"SF Pro Text",sans-serif`;
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.28em";
       ctx.fillStyle = "rgba(143,224,220,0.65)";
-      ctx.fillText("ARSENAL", 40, 96);
+      ctx.fillText("ARSENAL", titleX, 96);
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
-      // "Skill Field" heading
       ctx.font = `700 40px -apple-system,"SF Pro Display",sans-serif`;
       ctx.fillStyle = "rgba(255,239,192,0.92)";
-      ctx.fillText("What I Work With", 40, 116);
-      // Subtitle
+      ctx.fillText("What I Work With", titleX, 116);
       ctx.font = `400 13px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
-      ctx.fillText("Drag any node to rearrange — the field responds.", 40, 166);
+      ctx.fillText("Drag any node to rearrange — the field responds.", titleX, 166);
       ctx.restore();
 
       // --- Ripple rings ---
