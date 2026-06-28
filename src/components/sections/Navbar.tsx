@@ -24,12 +24,6 @@ export function Navbar({
             </a>
           ))}
         </div>
-        <a
-          href={settings.ctaHref}
-          className="navbar-cta font-label text-[11px] tracking-[0.08em] uppercase px-5 py-1.5 rounded-full active:scale-95 transition-all duration-150"
-        >
-          {settings.ctaLabel}
-        </a>
       </nav>
     </header>
   );
