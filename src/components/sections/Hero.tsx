@@ -1,6 +1,6 @@
 import type { SiteData } from "@/lib/data";
 import { FloatingLanguages } from "@/components/sections/FloatingLanguages";
-import { HeroIdentity } from "@/components/sections/HeroIdentity";
+import { PacmanHero } from "@/components/sections/PacmanHero";
 
 export function Hero({ settings }: { settings: SiteData["settings"] }) {
   return (
@@ -8,13 +8,12 @@ export function Hero({ settings }: { settings: SiteData["settings"] }) {
       {/* Packed field of floating greeting bubbles filling the hero */}
       <FloatingLanguages />
 
-      {/* Soft radial scrim so the identity line stays readable over the bubbles */}
+      {/* Soft radial scrim so the identity stays readable over the bubbles */}
       <div className="hero-scrim absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(56rem,92%)] h-[26rem] z-[5] pointer-events-none" />
 
       {/* Centered hero identity */}
       <div className="relative z-10 text-center flex flex-col items-center gap-3">
-        <span className="text-5xl drop-shadow-[0_2px_12px_rgba(143,224,220,0.6)]">🌊</span>
-        <HeroIdentity />
+        <PacmanHero />
       </div>
     </section>
   );
