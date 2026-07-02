@@ -69,31 +69,8 @@ model Greeting {
   order Int    @default(0)
 }
 
-// --- Experience (Core Modules cards) -----------------------------------
-
-model Experience {
-  id          String   @id @default(cuid())
-  icon        String   @default("terminal") // Material Symbol name
-  badge       String   @default("")         // e.g. "Ongoing Research"
-  title       String
-  description String
-  tags        String[] @default([])
-  order       Int      @default(0)
-}
-
-// --- Education cards ----------------------------------------------------
-
-model Education {
-  id          String   @id @default(cuid())
-  icon        String   @default("compost")
-  badge       String   @default("")
-  title       String
-  description String
-  tags        String[] @default([])
-  order       Int      @default(0)
-}
-
 // --- Skill Tree nodes (living-CV progression graph) --------------------
+// Drives the homepage Education / Experience / Skills columns via `category`.
 
 model SkillTreeNode {
   id          String   @id @default(cuid())

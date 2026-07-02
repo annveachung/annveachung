@@ -6,8 +6,6 @@ import { SidebarLink } from "@/components/admin/SidebarLink";
 
 const NAV = [
   { href: "/admin/welcome", icon: "home", label: "Welcome & Hero" },
-  { href: "/admin/experience", icon: "work", label: "Experience" },
-  { href: "/admin/education", icon: "school", label: "Education" },
   { href: "/admin/skills", icon: "account_tree", label: "Skill Tree" },
   { href: "/admin/map", icon: "public", label: "Global Map" },
   { href: "/admin/gallery", icon: "photo_library", label: "Visual Logs" },

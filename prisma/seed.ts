@@ -27,8 +27,6 @@ async function main() {
   await prisma.navLink.deleteMany();
   await prisma.socialLink.deleteMany();
   await prisma.greeting.deleteMany();
-  await prisma.experience.deleteMany();
-  await prisma.education.deleteMany();
   await prisma.skillTreeNode.deleteMany();
   await prisma.visitedCountry.deleteMany();
   await prisma.galleryImage.deleteMany();
@@ -86,36 +84,6 @@ async function main() {
       "გამარჯობა", // Georgian
       "Բարև", // Armenian
     ].map((text, order) => ({ text, order })),
-  });
-
-  // --- Experience (Core Modules) ---------------------------------------
-  await prisma.experience.createMany({
-    data: [
-      {
-        icon: "terminal",
-        badge: "Ongoing Research",
-        title: "Global Tech Academy",
-        description:
-          "Advanced systems architecture and front-end optimization. Scaling nocturnal workspaces for a global, decentralized creative collective.",
-        tags: ["Engineering", "Systems"],
-        order: 0,
-      },
-    ],
-  });
-
-  // --- Education --------------------------------------------------------
-  await prisma.education.createMany({
-    data: [
-      {
-        icon: "compost",
-        badge: "Class of 2022",
-        title: "University of Coastal Magic",
-        description:
-          "Specializing in ethereal interface systems and fluid motion theories. My research focused on the emotional resonance of digital depth.",
-        tags: ["UX Theory", "Fluidity"],
-        order: 0,
-      },
-    ],
   });
 
   // --- Skill Tree (living-CV progression graph) ------------------------
