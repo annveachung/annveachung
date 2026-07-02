@@ -73,12 +73,12 @@ model Greeting {
 // Drives the homepage Education / Experience / Skills columns via `category`.
 
 model SkillTreeNode {
-  id          String   @id @default(cuid())
-  title       String
-  category    String   @default("skill")     // education | experience | skill
-  period      String   @default("")          // year or range, e.g. "2018–2022"
-  description String   @default("")
-  status      String   @default("completed") // completed | learning | planned
+  id           String   @id @default(cuid())
+  title        String                          // role / degree (education & experience) or skill name
+  category     String   @default("skill")      // education | experience | skill
+  city         String   @default("")           // city (education & experience cards)
+  organization String   @default("")           // institution / company (education & experience cards)
+  status       String   @default("completed")  // completed | learning | planned
   // Parent node ids this node connects back toward the root. Empty = root.
   parents     String[] @default([])
   order       Int      @default(0)

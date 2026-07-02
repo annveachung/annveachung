@@ -14,8 +14,8 @@ const nodeSchema = z.object({
   title: z.string().min(1),
   category: z.enum(["education", "experience", "skill"]),
   status: z.enum(["completed", "learning", "planned"]),
-  period: z.string().default(""),
-  description: z.string().default(""),
+  city: z.string().default(""),
+  organization: z.string().default(""),
   parents: z.array(z.string()).default([]),
   order: z.coerce.number().int().default(0),
 });

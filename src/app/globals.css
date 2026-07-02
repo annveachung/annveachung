@@ -581,8 +581,21 @@ body {
 .timeline-card--left  { --slide-dir: -20px; }
 .timeline-card--right { --slide-dir:  20px; }
 
+/* Hover: lift + settle. transition-delay is reset to 0 so the stagger delay
+   used for the entrance reveal doesn't lag the hover response. */
 .timeline-card:hover {
-  transform: scale(1.02) translateY(-2px) !important;
+  transform: scale(1.035) translateY(-6px) !important;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease !important;
+  transition-delay: 0s !important;
+}
+.timeline-accent {
+  transition: opacity 0.35s ease;
+}
+.timeline-card:hover .timeline-accent {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -590,6 +603,7 @@ body {
   .spring-path { stroke-dashoffset: 0; transition: none; }
   .spring-group { animation: none; }
   .timeline-card { opacity: 1; transform: none; transition: none; }
+  .timeline-card:hover { transform: none !important; }
 }
 
 /* ----------------------------------------------------------------------

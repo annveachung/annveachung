@@ -5,15 +5,15 @@ import {
   deleteTreeNode,
 } from "@/lib/actions/skilltree";
 import { PageHeader } from "@/components/admin/PageHeader";
-import { Field, TextArea, SubmitButton, DeleteButton, Card } from "@/components/admin/ui";
+import { Field, SubmitButton, DeleteButton, Card } from "@/components/admin/ui";
 
 type Node = {
   id: string;
   title: string;
   category: string;
   status: string;
-  period: string;
-  description: string;
+  city: string;
+  organization: string;
   parents: string[];
   order: number;
 };
@@ -94,7 +94,7 @@ export default async function SkillTreePage() {
     <div>
       <PageHeader
         title="Skill Tree"
-        subtitle="Education, experience and skill nodes for the living-CV graph. Connect each node to its parent(s) to grow the tree."
+        subtitle="Education, experience and skill nodes for the living-CV graph. For education & experience, Title is the role/degree; City and Institution/Company fill the card's other two lines. Skill nodes only use Title. Connect each node to its parent(s) to grow the tree."
       />
 
       <div className="flex flex-col gap-4">
@@ -102,19 +102,11 @@ export default async function SkillTreePage() {
           <Card key={n.id}>
             <form action={updateTreeNode} className="grid md:grid-cols-2 gap-4">
               <input type="hidden" name="id" value={n.id} />
-              <Field label="Title" name="title" defaultValue={n.title} />
-              <Field label="Period" name="period" defaultValue={n.period} required={false} />
+              <Field label="Title (role / degree)" name="title" defaultValue={n.title} />
+              <Field label="City" name="city" defaultValue={n.city} required={false} />
               <Select label="Category" name="category" value={n.category} options={CATEGORIES} />
               <Select label="Status" name="status" value={n.status} options={STATUSES} />
-              <div className="md:col-span-2">
-                <TextArea
-                  label="Description (1–2 lines)"
-                  name="description"
-                  defaultValue={n.description}
-                  required={false}
-                  rows={2}
-                />
-              </div>
+              <Field label="Institution / Company" name="organization" defaultValue={n.organization} required={false} />
               <Field label="Order" name="order" type="number" defaultValue={n.order} />
               <div className="md:col-span-2">
                 <ParentPicker all={nodes} self={n.id} selected={n.parents} />
@@ -132,18 +124,11 @@ export default async function SkillTreePage() {
 
         <Card>
           <form action={createTreeNode} className="grid md:grid-cols-2 gap-4">
-            <Field label="Title" name="title" placeholder="University of Toronto" />
-            <Field label="Period" name="period" placeholder="2018 – 2022" required={false} />
+            <Field label="Title (role / degree)" name="title" placeholder="Honours BSc, Computer Science" />
+            <Field label="City" name="city" placeholder="Toronto, Canada" required={false} />
             <Select label="Category" name="category" options={CATEGORIES} />
             <Select label="Status" name="status" options={STATUSES} />
-            <div className="md:col-span-2">
-              <TextArea
-                label="Description (1–2 lines)"
-                name="description"
-                required={false}
-                rows={2}
-              />
-            </div>
+            <Field label="Institution / Company" name="organization" placeholder="University of Toronto" required={false} />
             <Field label="Order" name="order" type="number" defaultValue={nodes.length} />
             <div className="md:col-span-2">
               <ParentPicker all={nodes} selected={[]} />

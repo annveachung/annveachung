@@ -22,8 +22,6 @@ function sinePath(totalH: number) {
 
 // --- Sub-components --------------------------------------------------
 
-type Hover = { node: Node; x: number; y: number } | null;
-
 function StatusBadge({ status }: { status: string }) {
   const base = "inline-block font-label text-[9px] tracking-[0.18em] uppercase px-2 py-0.5 rounded border";
   const styles: Record<string, string> = {
@@ -42,14 +40,10 @@ function TimelineCard({
   node,
   side,
   delay,
-  onHover,
-  onLeave,
 }: {
   node: Node;
   side: "left" | "right";
   delay: number;
-  onHover: (node: Node, x: number, y: number) => void;
-  onLeave: () => void;
 }) {
   const isLeft = side === "left";
   const borderColor = isLeft
@@ -65,26 +59,26 @@ function TimelineCard({
     <div
       className={`timeline-card timeline-card--${side} relative flex-1 bg-charcoal/70 backdrop-blur-md border ${borderColor} ${hoverGlow} rounded-md cursor-pointer transition-all duration-300`}
       style={{ transitionDelay: `${delay}s` }}
-      onMouseEnter={(e) => onHover(node, e.clientX, e.clientY)}
-      onMouseMove={(e) => onHover(node, e.clientX, e.clientY)}
-      onMouseLeave={onLeave}
     >
-      <div className={`${topAccent} h-[3px] rounded-t-md opacity-60`} />
+      <div className={`timeline-accent ${topAccent} h-[3px] rounded-t-md opacity-60`} />
       <div className="px-4 py-3">
         <div className="flex items-start justify-between gap-2 mb-1">
+          {/* Row 1 — role / degree */}
           <p className="font-headline font-bold text-sm text-primary leading-snug flex-1">
             {node.title}
           </p>
           <StatusBadge status={node.status} />
         </div>
-        {node.period && (
-          <p className="font-label text-[10px] tracking-[0.15em] text-secondary mb-1.5">
-            {node.period}
+        {/* Row 2 — city */}
+        {node.city && (
+          <p className="font-label text-[10px] tracking-[0.15em] text-secondary mb-1">
+            {node.city}
           </p>
         )}
-        {node.description && (
+        {/* Row 3 — institution / company */}
+        {node.organization && (
           <p className="text-on-surface-variant text-xs leading-relaxed">
-            {node.description}
+            {node.organization}
           </p>
         )}
       </div>
@@ -119,7 +113,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const [springH, setSpringH] = useState(0);
-  const [hover, setHover] = useState<Hover>(null);
 
   const eduNodes = nodes
     .filter((n) => n.category === "education")
@@ -162,7 +155,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
       ref={sectionRef}
       id="skills"
       className={`skilltree relative w-full overflow-hidden scroll-mt-20 ${inView ? "in-view" : ""}`}
-      onMouseLeave={() => setHover(null)}
     >
       <div className="skilltree-aurora pointer-events-none absolute inset-0" />
 
@@ -207,8 +199,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
                 node={n}
                 side="left"
                 delay={i * STAGGER}
-                onHover={(node, x, y) => setHover({ node, x, y })}
-                onLeave={() => setHover(null)}
               />
             ))}
           </div>
@@ -249,49 +239,11 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
                 node={n}
                 side="right"
                 delay={i * STAGGER + 0.06}
-                onHover={(node, x, y) => setHover({ node, x, y })}
-                onLeave={() => setHover(null)}
               />
             ))}
           </div>
         </div>
-
-
       </div>
-
-      {/* Tooltip */}
-      {hover && (
-        <div
-          className="pointer-events-none fixed z-50 w-64 -translate-x-1/2 -translate-y-[115%] rounded-md bg-charcoal/85 backdrop-blur-xl border border-accent-turquoise/25 px-4 py-3 shadow-2xl"
-          style={{ left: hover.x, top: hover.y }}
-        >
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className={`h-2 w-2 rounded-full ${
-                hover.node.category === "education"
-                  ? "bg-primary"
-                  : hover.node.category === "experience"
-                    ? "bg-secondary"
-                    : "bg-accent-turquoise/70"
-              }`}
-            />
-            <span className="font-label text-[10px] tracking-[0.18em] uppercase text-on-surface-variant">
-              {hover.node.category} · {hover.node.status}
-            </span>
-          </div>
-          <p className="font-headline text-primary text-base leading-snug">
-            {hover.node.title}
-          </p>
-          {hover.node.period && (
-            <p className="text-secondary text-xs mt-0.5">{hover.node.period}</p>
-          )}
-          {hover.node.description && (
-            <p className="text-on-surface-variant text-xs mt-1.5 leading-relaxed">
-              {hover.node.description}
-            </p>
-          )}
-        </div>
-      )}
     </section>
   );
 }
