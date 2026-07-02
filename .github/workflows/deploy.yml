@@ -41,10 +41,13 @@ jobs:
           rm -rf deploy && mkdir -p deploy
           # Standalone server + traced node_modules + package.json + server.js
           cp -r .next/standalone/. deploy/
-          # Static assets and public/ are NOT included in standalone — add them
-          mkdir -p deploy/.next
+          # Static assets and public/ are NOT included in standalone — add them.
+          # Next's standalone scaffolds an empty deploy/public, so copy the
+          # *contents* of public/ into it (public/. → deploy/public/) rather than
+          # the dir itself, which would nest as deploy/public/public.
+          mkdir -p deploy/.next deploy/public
           cp -r .next/static deploy/.next/static
-          [ -d public ] && cp -r public deploy/public
+          [ -d public ] && cp -r public/. deploy/public/
           # Prisma schema + migrations so the server can run `migrate deploy`
           cp -r prisma deploy/prisma
           # Belt-and-suspenders: ensure the generated client + engine are present
