@@ -8,6 +8,10 @@ import { VisualLogs } from "@/components/sections/VisualLogs";
 import { Connect } from "@/components/sections/Connect";
 import { Footer } from "@/components/sections/Footer";
 
+// This page reads live data from the database, so render it per request
+// instead of prerendering at build time (no DB is reachable during CI build).
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const data = await getSiteData();
 
