@@ -1,0 +1,96 @@
+name: Deploy to production
+
+# Builds the Next.js app on the GitHub runner (x86_64, matching the Oracle
+# AMD instance), assembles a standalone bundle, rsyncs it to the server, then
+# runs migrations and reloads the process. The 1 GB server never builds.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {} # manual trigger from the Actions tab
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  APP_DIR: /var/www/annveachung
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build # = prisma generate && next build (emits .next/standalone)
+
+      - name: Assemble deploy bundle
+        run: |
+          set -euo pipefail
+          rm -rf deploy && mkdir -p deploy
+          # Standalone server + traced node_modules + package.json + server.js
+          cp -r .next/standalone/. deploy/
+          # Static assets and public/ are NOT included in standalone — add them
+          mkdir -p deploy/.next
+          cp -r .next/static deploy/.next/static
+          [ -d public ] && cp -r public deploy/public
+          # Prisma schema + migrations so the server can run `migrate deploy`
+          cp -r prisma deploy/prisma
+          # Belt-and-suspenders: ensure the generated client + engine are present
+          mkdir -p deploy/node_modules
+          cp -r node_modules/.prisma deploy/node_modules/.prisma
+
+      - name: Setup SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Rsync bundle to server
+        run: |
+          set -euo pipefail
+          rsync -az --delete \
+            --exclude='.env' \
+            --exclude='public/uploads/' \
+            -e "ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }}" \
+            deploy/ \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.APP_DIR }}/"
+
+      - name: Migrate & reload on server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            'bash -s' <<'REMOTE'
+          set -euo pipefail
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+          cd /var/www/annveachung
+
+          # Load runtime env (DATABASE_URL, AUTH_SECRET, PORT, ...) into this shell
+          set -a; . ./.env; set +a
+
+          echo "==> Applying database migrations"
+          prisma migrate deploy --schema prisma/schema.prisma
+
+          echo "==> Starting/reloading app"
+          # First deploy: start; subsequent deploys: zero-downtime reload
+          pm2 reload annveachung --update-env 2>/dev/null || \
+            pm2 start server.js --name annveachung --update-env
+          pm2 save
+
+          pm2 status annveachung
+          REMOTE
