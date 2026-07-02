@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "AdminUser" (
     "id" TEXT NOT NULL,
@@ -17,8 +20,8 @@ CREATE TABLE "SiteSettings" (
     "heroSubtitle" TEXT NOT NULL DEFAULT 'Architecting immersive digital experiences at the intersection of technical precision and artistic whimsy.',
     "ctaLabel" TEXT NOT NULL DEFAULT 'Connect',
     "ctaHref" TEXT NOT NULL DEFAULT '#',
-    "mapTitle" TEXT NOT NULL DEFAULT 'Global Digital Architecture',
-    "mapSubtitle" TEXT NOT NULL DEFAULT 'A real-time visualization of edge nodes and interactive data conduits across the nocturnal shoreline network. Orchestrating fluid experiences at global scale.',
+    "mapTitle" TEXT NOT NULL DEFAULT 'visited.json',
+    "mapSubtitle" TEXT NOT NULL DEFAULT 'Every country I''ve set foot in, gently illuminated — a quiet map of where the journey has taken me so far.',
     "mapFocus" TEXT NOT NULL DEFAULT 'Systems Synthesis',
     "mapLatency" TEXT NOT NULL DEFAULT '24ms',
     "footerTagline" TEXT NOT NULL DEFAULT 'Built for the Nocturnal Shoreline',
@@ -83,24 +86,27 @@ CREATE TABLE "Education" (
 );
 
 -- CreateTable
-CREATE TABLE "Skill" (
+CREATE TABLE "SkillTreeNode" (
     "id" TEXT NOT NULL,
-    "icon" TEXT NOT NULL DEFAULT 'design_services',
-    "label" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "category" TEXT NOT NULL DEFAULT 'skill',
+    "period" TEXT NOT NULL DEFAULT '',
+    "description" TEXT NOT NULL DEFAULT '',
+    "status" TEXT NOT NULL DEFAULT 'completed',
+    "parents" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "order" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "Skill_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "SkillTreeNode_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "MapNode" (
+CREATE TABLE "VisitedCountry" (
     "id" TEXT NOT NULL,
-    "label" TEXT NOT NULL,
-    "x" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
-    "y" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "order" INTEGER NOT NULL DEFAULT 0,
 
-    CONSTRAINT "MapNode_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "VisitedCountry_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -115,3 +121,7 @@ CREATE TABLE "GalleryImage" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AdminUser_username_key" ON "AdminUser"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VisitedCountry_code_key" ON "VisitedCountry"("code");
+
