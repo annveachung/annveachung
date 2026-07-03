@@ -15,7 +15,7 @@ export default async function GalleryPage() {
     <div>
       <PageHeader
         title="Visual Logs"
-        subtitle="Photos shown in the looping gallery marquee. Upload 16:9 (landscape) photos or paste URLs — each is displayed at 16:9 and cover-cropped to fill."
+        subtitle="Photos shown in the looping gallery marquee. Upload 16:9 (landscape) photos or paste URLs — each is displayed at 16:9 and cover-cropped to fill. Caption is shown as the location a pacman announces on hover."
       />
 
       <div className="flex flex-col gap-4">
@@ -31,10 +31,11 @@ export default async function GalleryPage() {
               />
               <div className="flex items-end gap-3 flex-wrap">
                 <Field
-                  label="Caption"
+                  label="Location"
                   name="caption"
                   defaultValue={img.caption}
                   required={false}
+                  placeholder="Kyoto, Japan"
                 />
                 <Field label="Order" name="order" type="number" defaultValue={img.order} />
                 <SubmitButton variant="ghost">Update</SubmitButton>
@@ -51,7 +52,7 @@ export default async function GalleryPage() {
           <form action={createGalleryImage} className="flex flex-col gap-3">
             <ImageUploader name="url" label="Photo (16:9)" previewClassName="w-48 aspect-video" />
             <div className="flex items-end gap-3 flex-wrap">
-              <Field label="Caption" name="caption" required={false} placeholder="Visual Log" />
+              <Field label="Location" name="caption" required={false} placeholder="Kyoto, Japan" />
               <Field label="Order" name="order" type="number" defaultValue={images.length} />
               <SubmitButton>Add image</SubmitButton>
             </div>

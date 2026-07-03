@@ -1,29 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { makePacmanPath } from "@/lib/pacman";
 
 // ─── constants ────────────────────────────────────────────────────────────────
 const YELLOW = "#fff4c4";
 const PARTICLE_COLORS = ["#fff4c4", "#ffefc0", "#ffe680", "#8fe0dc", "#c4f0ee", "#ffffff"];
-const SVG_R       = 40;
 const MAX_SCALE   = 4.6;
 const GROW_RATE   = 1.3;   // scale units / sec while hovering
 const SHRINK_RATE = 0.5;   // scale units / sec while not hovering
 const SHAKE_START = 3.2;   // start jittering above this scale
 const PARTICLE_N  = 14;
 const SPAWN_MS    = 420;   // duration of spawn-in animation
-
-// ─── SVG path ─────────────────────────────────────────────────────────────────
-function makePath(deg: number): string {
-  if (deg < 1)
-    return `M10,50 A${SVG_R},${SVG_R},0,1,0,90,50 A${SVG_R},${SVG_R},0,1,0,10,50`;
-  const r  = (deg * Math.PI) / 180;
-  const ux = (50 + SVG_R * Math.cos(r)).toFixed(2);
-  const uy = (50 - SVG_R * Math.sin(r)).toFixed(2);
-  const lx = ux;
-  const ly = (50 + SVG_R * Math.sin(r)).toFixed(2);
-  return `M50,50 L${ux},${uy} A${SVG_R},${SVG_R},0,1,0,${lx},${ly}Z`;
-}
 
 // ─── types ────────────────────────────────────────────────────────────────────
 interface Particle { id: number; tx: number; ty: number; color: string; size: number; }
@@ -206,7 +194,7 @@ export function PacmanHero() {
             }}
           >
             <path
-              d={makePath(isNorm ? mouth : 28)}
+              d={makePacmanPath(isNorm ? mouth : 28)}
               fill={YELLOW}
             />
           </svg>

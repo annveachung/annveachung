@@ -650,3 +650,20 @@ body {
   65%  { opacity: 1; transform: scale(1.22) rotate(10deg); }
   100% { opacity: 1; transform: scale(1)    rotate(0deg);  }
 }
+
+/* ── Gallery card hover: pacman "announces" the photo's location ─────────── */
+.gallery-card-overlay {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(to top, rgba(10, 14, 17, 0.82), transparent);
+  pointer-events: none;
+}
+.gallery-card-overlay--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-card-overlay { transition: opacity 0.2s ease; transform: none; }
+}
