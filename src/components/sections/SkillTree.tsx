@@ -71,14 +71,14 @@ function TimelineCard({
           </p>
           <StatusBadge status={node.status} />
         </div>
-        {/* Row 2 — city */}
-        {node.city && (
+        {/* Row 2 — city (omitted entirely when not populated, so the card is shorter) */}
+        {node.city.trim() && (
           <p className="font-label text-[10px] tracking-[0.15em] text-secondary mb-1">
             {node.city}
           </p>
         )}
         {/* Row 3 — institution / company */}
-        {node.organization && (
+        {node.organization.trim() && (
           <p className="text-on-surface-variant text-xs leading-relaxed">
             {node.organization}
           </p>
