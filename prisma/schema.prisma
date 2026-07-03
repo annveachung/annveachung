@@ -78,6 +78,7 @@ model SkillTreeNode {
   category     String   @default("skill")      // education | experience | skill
   city         String   @default("")           // city (education & experience cards)
   organization String   @default("")           // institution / company (education & experience cards)
+  icon         String   @default("")           // uploaded icon URL (skill nodes)
   status       String   @default("completed")  // completed | learning | planned
   // Parent node ids this node connects back toward the root. Empty = root.
   parents     String[] @default([])

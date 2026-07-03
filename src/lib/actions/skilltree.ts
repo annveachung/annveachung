@@ -16,6 +16,7 @@ const nodeSchema = z.object({
   status: z.enum(["completed", "learning", "planned"]),
   city: z.string().default(""),
   organization: z.string().default(""),
+  icon: z.string().default(""),
   parents: z.array(z.string()).default([]),
   order: z.coerce.number().int().default(0),
 });

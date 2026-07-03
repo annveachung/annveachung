@@ -55,6 +55,17 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     const s = S.current;
     s.dpr = window.devicePixelRatio || 1;
 
+    // Preload skill icons — drawn inside the orbs. Every icon renders in the
+    // same-size circle regardless of its source dimensions (cover-cropped).
+    const iconImgs = new Map<string, HTMLImageElement>();
+    for (const sk of skills) {
+      if (sk.icon) {
+        const im = new Image();
+        im.src = sk.icon;
+        iconImgs.set(sk.id, im);
+      }
+    }
+
     // --- Layout ---------------------------------------------------------
     function layout(w: number, h: number) {
       const n  = skills.length;
@@ -338,21 +349,36 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Label
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const fz = Math.max(9, Math.min(13, Math.floor(r * 0.27)));
-        ctx.font = `500 ${fz}px -apple-system,"SF Pro Text",sans-serif`;
-        ctx.fillStyle = c.hex;
-
-        const words  = node.label.split(/[\s/]/);
-        const single = ctx.measureText(node.label).width < r * 1.5;
-        if (words.length <= 1 || single) {
-          ctx.fillText(node.label, x, y);
+        // Icon (if uploaded) — uniform size across all orbs, cover-cropped to
+        // a circle. Uses the base radius so every icon is identical in size.
+        const icon = iconImgs.get(node.id);
+        if (icon && icon.complete && icon.naturalWidth > 0) {
+          const size = node.r * 1.15;
+          const scale = Math.max(size / icon.naturalWidth, size / icon.naturalHeight);
+          const dw = icon.naturalWidth * scale, dh = icon.naturalHeight * scale;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(icon, x - dw / 2, y - dh / 2, dw, dh);
+          ctx.restore();
         } else {
-          const half = Math.ceil(words.length / 2);
-          ctx.fillText(words.slice(0, half).join(" "), x, y - fz * 0.68);
-          ctx.fillText(words.slice(half).join(" "),    x, y + fz * 0.68);
+          // Label fallback (no icon uploaded)
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          const fz = Math.max(9, Math.min(13, Math.floor(r * 0.27)));
+          ctx.font = `500 ${fz}px -apple-system,"SF Pro Text",sans-serif`;
+          ctx.fillStyle = c.hex;
+
+          const words  = node.label.split(/[\s/]/);
+          const single = ctx.measureText(node.label).width < r * 1.5;
+          if (words.length <= 1 || single) {
+            ctx.fillText(node.label, x, y);
+          } else {
+            const half = Math.ceil(words.length / 2);
+            ctx.fillText(words.slice(0, half).join(" "), x, y - fz * 0.68);
+            ctx.fillText(words.slice(half).join(" "),    x, y + fz * 0.68);
+          }
         }
       }
 

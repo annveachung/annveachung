@@ -5,9 +5,13 @@ import { useState } from "react";
 export function ImageUploader({
   name = "url",
   defaultValue = "",
+  label = "Image",
+  required = true,
 }: {
   name?: string;
   defaultValue?: string;
+  label?: string;
+  required?: boolean;
 }) {
   const [url, setUrl] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
@@ -33,7 +37,7 @@ export function ImageUploader({
   return (
     <div className="flex flex-col gap-2 w-full">
       <span className="font-label text-[10px] tracking-[0.1em] uppercase text-on-surface-variant">
-        Image
+        {label}
       </span>
       <div className="flex items-center gap-4">
         {url ? (
@@ -68,7 +72,7 @@ export function ImageUploader({
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="/uploads/… or https://…"
-        required
+        required={required}
         className="bg-midnight/60 border border-outline-variant/40 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-accent-turquoise focus:outline-none transition-colors"
       />
     </div>
