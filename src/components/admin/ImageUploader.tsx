@@ -7,11 +7,13 @@ export function ImageUploader({
   defaultValue = "",
   label = "Image",
   required = true,
+  previewClassName = "w-28 h-16",
 }: {
   name?: string;
   defaultValue?: string;
   label?: string;
   required?: boolean;
+  previewClassName?: string;
 }) {
   const [url, setUrl] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
@@ -45,10 +47,10 @@ export function ImageUploader({
           <img
             src={url}
             alt="preview"
-            className="w-28 h-16 object-cover rounded-lg border border-outline-variant/40"
+            className={`${previewClassName} object-cover rounded-lg border border-outline-variant/40`}
           />
         ) : (
-          <div className="w-28 h-16 rounded-lg border border-dashed border-outline-variant/40 flex items-center justify-center text-on-surface-variant/50">
+          <div className={`${previewClassName} rounded-lg border border-dashed border-outline-variant/40 flex items-center justify-center text-on-surface-variant/50`}>
             <span className="material-symbols-outlined">image</span>
           </div>
         )}
