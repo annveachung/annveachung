@@ -29,9 +29,11 @@ function StatusBadge({ status }: { status: string }) {
     learning: "bg-secondary/15 text-secondary border-secondary/40",
     planned: "text-on-surface-variant border-outline/30 border-dashed",
   };
+  // "learning" reads as "Ongoing" on education/experience cards.
+  const labels: Record<string, string> = { learning: "Ongoing" };
   return (
     <span className={`${base} ${styles[status] ?? styles.completed}`}>
-      {status}
+      {labels[status] ?? status}
     </span>
   );
 }
