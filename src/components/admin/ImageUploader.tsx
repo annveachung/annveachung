@@ -26,6 +26,21 @@ export function ImageUploader({
       const body = new FormData();
       body.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body });
+
+      // A reverse proxy (e.g. nginx) can reject the request before it reaches
+      // the app and return an HTML error page — most commonly a 413 when the
+      // file exceeds the proxy's client_max_body_size. Detect that so the user
+      // gets a clear message instead of a JSON-parse error.
+      const isJson = res.headers.get("content-type")?.includes("application/json");
+      if (!isJson) {
+        if (res.status === 413) {
+          throw new Error(
+            "File too large for the server (proxy limit). Ask the admin to raise nginx client_max_body_size.",
+          );
+        }
+        throw new Error(`Upload failed (HTTP ${res.status}).`);
+      }
+
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed");
       setUrl(json.url);
