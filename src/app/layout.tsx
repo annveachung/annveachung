@@ -60,7 +60,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Annvea Chung | Nocturnal Shoreline Tech",
+  title: "Annvea Chung's Web",
   description:
     "Architecting immersive digital experiences at the intersection of technical precision and artistic whimsy.",
 };
