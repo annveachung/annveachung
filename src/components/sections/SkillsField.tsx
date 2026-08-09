@@ -80,7 +80,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         let rx = cx + ρ * Math.cos(θ);
         let ry = cy + ρ * Math.sin(θ);
         rx = Math.max(r + 28, Math.min(w - r - 28, rx));
-        ry = Math.max(r + 28, Math.min(h - r - 28, ry));
+        ry = Math.max(r + 28, Math.min(h - r - 40, ry)); // extra bottom room for the name label
         return { id: sk.id, label: sk.title, status: sk.status,
                  x: rx, y: ry, vx: 0, vy: 0, rx, ry,
                  r, phase: (i * 1.618) % (Math.PI * 2), lift: 0 };
@@ -99,8 +99,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
               a.rx -= dx * p; a.ry -= dy * p;
               b.rx += dx * p; b.ry += dy * p;
               const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-              a.rx = clamp(a.rx, a.r+28, w-a.r-28); a.ry = clamp(a.ry, a.r+28, h-a.r-28);
-              b.rx = clamp(b.rx, b.r+28, w-b.r-28); b.ry = clamp(b.ry, b.r+28, h-b.r-28);
+              a.rx = clamp(a.rx, a.r+28, w-a.r-28); a.ry = clamp(a.ry, a.r+28, h-a.r-40);
+              b.rx = clamp(b.rx, b.r+28, w-b.r-28); b.ry = clamp(b.ry, b.r+28, h-b.r-40);
             }
           }
         }
@@ -168,12 +168,13 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         n.vx *= DAMP; n.vy *= DAMP;
         n.x  += n.vx; n.y  += n.vy;
 
-        // Boundary bounce
+        // Boundary bounce — extra bottom clearance so the name label never bounces off-canvas
         const m = n.r + 18;
-        if (n.x < m)        { n.x = m;        n.vx =  Math.abs(n.vx) * 0.35; }
-        if (n.x > s.w - m)  { n.x = s.w - m;  n.vx = -Math.abs(n.vx) * 0.35; }
-        if (n.y < m)        { n.y = m;         n.vy =  Math.abs(n.vy) * 0.35; }
-        if (n.y > s.h - m)  { n.y = s.h - m;  n.vy = -Math.abs(n.vy) * 0.35; }
+        const mBottom = n.r + 30;
+        if (n.x < m)             { n.x = m;             n.vx =  Math.abs(n.vx) * 0.35; }
+        if (n.x > s.w - m)       { n.x = s.w - m;       n.vx = -Math.abs(n.vx) * 0.35; }
+        if (n.y < m)             { n.y = m;             n.vy =  Math.abs(n.vy) * 0.35; }
+        if (n.y > s.h - mBottom) { n.y = s.h - mBottom; n.vy = -Math.abs(n.vy) * 0.35; }
       }
 
       // Soft repulsion between all node pairs
@@ -369,23 +370,26 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
           ctx.drawImage(icon, x - dw / 2, y - dh / 2, dw, dh);
           ctx.restore();
         } else {
-          // Label fallback (no icon uploaded)
+          // Fallback glyph (no icon uploaded) — first letter, name still labelled below.
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          const fz = Math.max(9, Math.min(13, Math.floor(r * 0.27)));
-          ctx.font = `500 ${fz}px -apple-system,"SF Pro Text",sans-serif`;
+          ctx.font = `600 ${Math.floor(r * 0.55)}px -apple-system,"SF Pro Display",sans-serif`;
           ctx.fillStyle = c.hex;
-
-          const words  = node.label.split(/[\s/]/);
-          const single = ctx.measureText(node.label).width < r * 1.5;
-          if (words.length <= 1 || single) {
-            ctx.fillText(node.label, x, y);
-          } else {
-            const half = Math.ceil(words.length / 2);
-            ctx.fillText(words.slice(0, half).join(" "), x, y - fz * 0.68);
-            ctx.fillText(words.slice(half).join(" "),    x, y + fz * 0.68);
-          }
+          ctx.fillText(node.label.charAt(0).toUpperCase(), x, y + 1);
         }
+
+        // Skill name — always shown below the orb (title field from the admin panel).
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        let labelFz = 11;
+        ctx.font = `500 ${labelFz}px -apple-system,"SF Pro Text",sans-serif`;
+        const maxLabelW = r * 2.6;
+        while (ctx.measureText(node.label).width > maxLabelW && labelFz > 8) {
+          labelFz -= 1;
+          ctx.font = `500 ${labelFz}px -apple-system,"SF Pro Text",sans-serif`;
+        }
+        ctx.fillStyle = "rgba(219,228,232,0.85)";
+        ctx.fillText(node.label, x, y + r + 10);
       }
 
       // --- Edge fades: blend canvas into neighbouring sections ---
