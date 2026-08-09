@@ -279,7 +279,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
       const hint = isMobile ? "Drag a node to rearrange." : "Drag any node to rearrange — the field responds.";
-      ctx.fillText(hint, titleX, headlineSize + 76);
+      ctx.fillText(hint, titleX, 116 + headlineSize + 10);
       ctx.restore();
 
       // --- Ripple rings ---
