@@ -10,7 +10,7 @@ export function Footer({
   const year = new Date().getFullYear();
   return (
     <footer className="w-full bg-charcoal border-t border-outline-variant/30 py-xl mt-xl">
-      <div className="max-w-7xl mx-auto px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-md">
+      <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-md">
         <div className="flex flex-col items-center md:items-start gap-4">
           <span className="font-headline text-primary text-2xl font-bold">
             {settings.brandName}
@@ -19,7 +19,7 @@ export function Footer({
             © {year} {settings.brandName} — {settings.footerTagline}
           </p>
         </div>
-        <div className="flex gap-8">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-8">
           {socialLinks.map((link) => (
             <a
               key={link.id}

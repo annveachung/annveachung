@@ -9,11 +9,11 @@ export function VisualLogs({ gallery }: { gallery: SiteData["gallery"] }) {
 
   return (
     <section id="logs" className="visual-logs w-full scroll-mt-32 pt-10 bg-[#141b1f]">
-      <div className="max-w-7xl mx-auto px-margin-desktop mb-8">
+      <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop mb-8">
         <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
           Gallery
         </span>
-        <h2 className="font-headline font-bold text-[32px] leading-[40px] text-primary mt-2">
+        <h2 className="font-headline font-bold text-[26px] leading-[34px] sm:text-[32px] sm:leading-[40px] text-primary mt-2">
           Archive of Little Things
         </h2>
         <p className="text-on-surface-variant">

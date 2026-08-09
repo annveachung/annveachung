@@ -128,18 +128,18 @@ export function GlobalMap({
       <div className="worldmap-bg pointer-events-none absolute inset-0" />
 
       {/* Heading */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pt-12">
-        <div className="flex items-end justify-between gap-4">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
               Whereabouts
             </span>
-            <h2 className="font-headline font-bold text-[48px] leading-[56px] text-primary mt-2">
+            <h2 className="font-headline font-bold text-[32px] leading-[38px] sm:text-[48px] sm:leading-[56px] text-primary mt-2">
               The Map So Far
             </h2>
           </div>
-          <div className="text-right flex flex-col items-end pb-1">
-            <span className="font-headline font-bold text-[48px] leading-[52px] text-secondary">
+          <div className="text-left sm:text-right flex flex-col items-start sm:items-end pb-1">
+            <span className="font-headline font-bold text-[32px] leading-[38px] sm:text-[48px] sm:leading-[52px] text-secondary">
               {worldPct}%
             </span>
             <span className="font-label text-[11px] tracking-[0.25em] uppercase text-on-surface-variant">
@@ -151,7 +151,7 @@ export function GlobalMap({
       </div>
 
       {/* Map */}
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-margin-desktop pb-12 pt-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-margin-mobile md:px-margin-desktop pb-12 pt-6">
         <svg
           className="worldmap-svg w-full h-auto block"
           viewBox={viewBox}

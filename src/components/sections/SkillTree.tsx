@@ -88,7 +88,7 @@ function TimelineCard({
   );
 
   const connector = (
-    <div className={`${connectorBg} h-px w-5 flex-shrink-0 self-center`} />
+    <div className={`hidden md:block ${connectorBg} h-px w-5 flex-shrink-0 self-center`} />
   );
 
   return (
@@ -160,11 +160,11 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
     >
       <div className="skilltree-aurora pointer-events-none absolute inset-0" />
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-desktop pt-16 pb-10">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-16 pb-10">
         <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
           Progression
         </span>
-        <h2 className="font-headline font-bold text-[40px] leading-tight text-primary mt-2">
+        <h2 className="font-headline font-bold text-[28px] leading-tight md:text-[40px] text-primary mt-2">
           Where I've Been, What I've Done
         </h2>
         <p className="text-on-surface-variant max-w-[36rem] mt-2">
@@ -172,9 +172,9 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
         </p>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto w-full px-margin-desktop pb-20">
-        {/* Column labels */}
-        <div className="grid grid-cols-[1fr_80px_1fr] mb-5">
+      <div className="relative z-10 max-w-5xl mx-auto w-full px-margin-mobile md:px-margin-desktop pb-20">
+        {/* Column labels — desktop only; mobile shows inline labels per column below */}
+        <div className="hidden md:grid grid-cols-[1fr_80px_1fr] mb-5">
           <div className="text-right pr-5">
             <span className="font-label text-[10px] tracking-[0.25em] uppercase text-primary/50">
               Education
@@ -188,13 +188,16 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
           </div>
         </div>
 
-        {/* Three-column layout */}
+        {/* Single column on mobile, three-column spine layout from md up */}
         <div
           ref={containerRef}
-          className="grid grid-cols-[1fr_80px_1fr] gap-y-4"
+          className="grid grid-cols-1 md:grid-cols-[1fr_80px_1fr] gap-y-4"
         >
           {/* Education column */}
           <div className="flex flex-col gap-4">
+            <span className="md:hidden font-label text-[10px] tracking-[0.25em] uppercase text-primary/50">
+              Education
+            </span>
             {eduNodes.map((n, i) => (
               <TimelineCard
                 key={n.id}
@@ -205,8 +208,8 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
             ))}
           </div>
 
-          {/* Spring spine */}
-          <div className="relative flex justify-center">
+          {/* Spring spine — desktop only, doesn't make sense in a stacked layout */}
+          <div className="hidden md:flex relative justify-center">
             {springH > 0 && (
               <svg
                 width={80}
@@ -234,7 +237,10 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
           </div>
 
           {/* Experience column */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 mt-8 md:mt-0">
+            <span className="md:hidden font-label text-[10px] tracking-[0.25em] uppercase text-secondary/50">
+              Experience
+            </span>
             {expNodes.map((n, i) => (
               <TimelineCard
                 key={n.id}

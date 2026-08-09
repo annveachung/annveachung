@@ -258,8 +258,13 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       }
 
       // --- Section title ---
-      // Mirror the max-w-7xl mx-auto px-margin-desktop layout used by all other sections.
-      const titleX = Math.max(64, (w - 1280) / 2 + 64);
+      // Mirror the max-w-7xl mx-auto px-margin utility used by all other sections
+      // (16px on mobile, 64px from md up), scaling font sizes down on narrow canvases.
+      const isMobile = w < 640;
+      const margin = w < 768 ? 16 : Math.max(64, (w - 1280) / 2 + 64);
+      const titleX = margin;
+      const headlineSize = w < 480 ? 24 : w < 768 ? 30 : 40;
+      const bodySize = isMobile ? 12 : 13;
       ctx.save();
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
@@ -268,12 +273,13 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.fillStyle = "rgba(143,224,220,0.65)";
       ctx.fillText("ARSENAL", titleX, 96);
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
-      ctx.font = `700 40px -apple-system,"SF Pro Display",sans-serif`;
+      ctx.font = `700 ${headlineSize}px -apple-system,"SF Pro Display",sans-serif`;
       ctx.fillStyle = "rgba(255,239,192,0.92)";
       ctx.fillText("What I Work With", titleX, 116);
-      ctx.font = `400 13px -apple-system,"SF Pro Text",sans-serif`;
+      ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
-      ctx.fillText("Drag any node to rearrange — the field responds.", titleX, 166);
+      const hint = isMobile ? "Drag a node to rearrange." : "Drag any node to rearrange — the field responds.";
+      ctx.fillText(hint, titleX, headlineSize + 76);
       ctx.restore();
 
       // --- Ripple rings ---
@@ -475,8 +481,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
   return (
     <canvas
       ref={cvs}
-      className="w-full block"
-      style={{ height: "600px", touchAction: "none" }}
+      className="w-full block h-[460px] sm:h-[520px] md:h-[600px]"
+      style={{ touchAction: "none" }}
     />
   );
 }

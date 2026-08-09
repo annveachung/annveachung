@@ -28,7 +28,7 @@ export function GalleryCard({ img }: { img: GalleryImage }) {
 
   return (
     <div
-      className="gallery-card relative flex-shrink-0 w-[640px] aspect-video bg-cover bg-center rounded-xl mx-4 border border-outline-variant/20 shadow-2xl overflow-hidden"
+      className="gallery-card relative flex-shrink-0 w-[80vw] sm:w-[420px] md:w-[640px] aspect-video bg-cover bg-center rounded-xl mx-4 border border-outline-variant/20 shadow-2xl overflow-hidden"
       style={{ backgroundImage: `url('${img.url}')` }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
