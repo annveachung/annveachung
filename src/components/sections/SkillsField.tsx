@@ -71,8 +71,18 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       const n  = skills.length;
       if (!n) return;
       const r  = Math.max(36, Math.min(52, Math.floor(Math.min(w, h) * 0.12)));
-      const spread = Math.min(w * 0.38, h * 0.38);
-      const cx = w / 2, cy = h / 2;
+
+      // Keep the golden-angle spiral clear of the title block (mirrors the
+      // headline sizing in draw()) so the default/rest layout never sits
+      // under "What I Work With" / the drag hint on load.
+      const headlineSize = w < 480 ? 24 : w < 768 ? 30 : 40;
+      const titleBottom = 116 + headlineSize + 10 + (w < 640 ? 12 : 13) + 18;
+      const yTop = Math.min(titleBottom, h * 0.45);
+      const yBottom = h - r - 40;
+
+      const cx = w / 2;
+      const cy = (yTop + yBottom) / 2;
+      const spread = Math.min(w * 0.38, Math.max(40, (yBottom - yTop) / 2));
 
       s.nodes = skills.map((sk, i) => {
         const θ = i * 2.39996; // golden angle
@@ -80,7 +90,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         let rx = cx + ρ * Math.cos(θ);
         let ry = cy + ρ * Math.sin(θ);
         rx = Math.max(r + 28, Math.min(w - r - 28, rx));
-        ry = Math.max(r + 28, Math.min(h - r - 40, ry)); // extra bottom room for the name label
+        ry = Math.max(yTop, Math.min(yBottom, ry));
         return { id: sk.id, label: sk.title, status: sk.status,
                  x: rx, y: ry, vx: 0, vy: 0, rx, ry,
                  r, phase: (i * 1.618) % (Math.PI * 2), lift: 0 };
@@ -99,8 +109,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
               a.rx -= dx * p; a.ry -= dy * p;
               b.rx += dx * p; b.ry += dy * p;
               const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-              a.rx = clamp(a.rx, a.r+28, w-a.r-28); a.ry = clamp(a.ry, a.r+28, h-a.r-40);
-              b.rx = clamp(b.rx, b.r+28, w-b.r-28); b.ry = clamp(b.ry, b.r+28, h-b.r-40);
+              a.rx = clamp(a.rx, a.r+28, w-a.r-28); a.ry = clamp(a.ry, yTop, yBottom);
+              b.rx = clamp(b.rx, b.r+28, w-b.r-28); b.ry = clamp(b.ry, yTop, yBottom);
             }
           }
         }
