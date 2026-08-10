@@ -48,6 +48,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     mouse:   { x: 0, y: 0 },
     raf:     0,
     w: 0, h: 0, dpr: 1,
+    topBound: 0, bottomBound: 0,
   });
 
   useEffect(() => {
@@ -74,15 +75,23 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
       // Keep the golden-angle spiral clear of the title block (mirrors the
       // headline sizing in draw()) so the default/rest layout never sits
-      // under "What I Work With" / the drag hint on load.
+      // under "What I Work With" / the drag hint on load. yTop bounds the
+      // node CENTER, so it must add back the orb's own radius (plus some
+      // buffer for the soft atmosphere-halo bleed) — otherwise a node's
+      // visible top edge (y - r) still reaches above the text.
       const headlineSize = w < 480 ? 24 : w < 768 ? 30 : 40;
-      const titleBottom = 116 + headlineSize + 10 + (w < 640 ? 12 : 13) + 18;
-      const yTop = Math.min(titleBottom, h * 0.45);
+      const titleBottom = 116 + headlineSize + 10 + (w < 640 ? 12 : 13) + 24;
+      const yTop = Math.min(titleBottom + r, h * 0.55);
       const yBottom = h - r - 40;
 
       const cx = w / 2;
       const cy = (yTop + yBottom) / 2;
       const spread = Math.min(w * 0.38, Math.max(40, (yBottom - yTop) / 2));
+
+      // Physics boundary bounce (below) reads these so idle drift / node
+      // repulsion can never push a node back up under the title either.
+      s.topBound = yTop;
+      s.bottomBound = yBottom;
 
       s.nodes = skills.map((sk, i) => {
         const θ = i * 2.39996; // golden angle
@@ -178,12 +187,15 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         n.vx *= DAMP; n.vy *= DAMP;
         n.x  += n.vx; n.y  += n.vy;
 
-        // Boundary bounce — extra bottom clearance so the name label never bounces off-canvas
+        // Boundary bounce. Top bound follows the title-clear zone computed in
+        // layout() (skipped while dragging — dragging under the title on
+        // purpose is allowed). Bottom keeps extra clearance for the name label.
         const m = n.r + 18;
+        const topM = dragged ? m : Math.max(m, s.topBound);
         const mBottom = n.r + 30;
         if (n.x < m)             { n.x = m;             n.vx =  Math.abs(n.vx) * 0.35; }
         if (n.x > s.w - m)       { n.x = s.w - m;       n.vx = -Math.abs(n.vx) * 0.35; }
-        if (n.y < m)             { n.y = m;             n.vy =  Math.abs(n.vy) * 0.35; }
+        if (n.y < topM)          { n.y = topM;          n.vy =  Math.abs(n.vy) * 0.35; }
         if (n.y > s.h - mBottom) { n.y = s.h - mBottom; n.vy = -Math.abs(n.vy) * 0.35; }
       }
 
@@ -419,9 +431,15 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     }
 
     // --- Loop -----------------------------------------------------------
+    // Skip the (fairly expensive — grid-warp + physics over every node)
+    // work while the canvas is scrolled off-screen, so it doesn't compete
+    // with scroll compositing elsewhere on the page.
+    let visible = true;
     function loop(t: number) {
-      physics(t);
-      draw(t);
+      if (visible) {
+        physics(t);
+        draw(t);
+      }
       s.raf = requestAnimationFrame(loop);
     }
 
@@ -472,10 +490,17 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
+    const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0 });
+    io.observe(canvas);
     canvas.addEventListener("mousedown", onDown);
     canvas.addEventListener("touchstart", onDown, { passive: false });
     window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchmove", onMove, { passive: false });
+    // Passive: onMove never calls preventDefault — the drag gesture is already
+    // kept from scrolling the page via `touch-action: none` on the canvas
+    // itself. A non-passive listener here forced the browser to wait on this
+    // (global, window-level) handler before every scroll could start, which
+    // is what made scrolling feel laggy on mobile everywhere on the page.
+    window.addEventListener("touchmove", onMove, { passive: true });
     window.addEventListener("mouseup",  onUp);
     window.addEventListener("touchend", onUp);
     s.raf = requestAnimationFrame(loop);
@@ -483,6 +508,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     return () => {
       cancelAnimationFrame(s.raf);
       ro.disconnect();
+      io.disconnect();
       canvas.removeEventListener("mousedown", onDown);
       canvas.removeEventListener("touchstart", onDown);
       window.removeEventListener("mousemove", onMove);
