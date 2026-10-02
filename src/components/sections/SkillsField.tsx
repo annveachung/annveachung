@@ -16,10 +16,9 @@ function col(status: string) { return PAL[status as StatusKey] ?? PAL.completed;
 
 // --- Physics constants --------------------------------------------------
 const K_IDLE  = 0.038;   // idle spring stiffness
-const K_DRAG  = 0.30;    // drag spring stiffness
 const DAMP    = 0.87;    // velocity damping per tick
 const REP     = 0.13;    // node repulsion strength
-const IDLE_A  = 9;       // idle float amplitude (px)
+const IDLE_A  = 14;      // idle float amplitude (px)
 const IDLE_W  = 0.00055; // idle float frequency (rad/ms)
 const SIGMA   = 120;     // Gaussian sigma for field wells
 
@@ -30,7 +29,6 @@ interface PNode {
   rx: number; ry: number; // rest/drop position
   r: number;
   phase: number;
-  lift: number; // 0..1 — animated when dragged
 }
 interface Ripple {
   cx: number; cy: number;
@@ -44,8 +42,6 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
   const S   = useRef({
     nodes:   [] as PNode[],
     ripples: [] as Ripple[],
-    dragIdx: -1,
-    mouse:   { x: 0, y: 0 },
     raf:     0,
     w: 0, h: 0, dpr: 1,
     topBound: 0, bottomBound: 0,
@@ -102,7 +98,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ry = Math.max(yTop, Math.min(yBottom, ry));
         return { id: sk.id, label: sk.title, status: sk.status,
                  x: rx, y: ry, vx: 0, vy: 0, rx, ry,
-                 r, phase: (i * 1.618) % (Math.PI * 2), lift: 0 };
+                 r, phase: (i * 1.618) % (Math.PI * 2), };
       });
 
       // Separation passes — push overlapping rest positions apart
@@ -168,30 +164,23 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
     // --- Physics tick ---------------------------------------------------
     function physics(t: number) {
-      const { nodes, mouse, dragIdx } = s;
+      const { nodes } = s;
 
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
-        const dragged = i === dragIdx;
 
-        // Lift animation
-        const liftTarget = dragged ? 1 : 0;
-        n.lift += (liftTarget - n.lift) * 0.09;
+        const tx = n.rx + IDLE_A * Math.sin(t * IDLE_W + n.phase);
+        const ty = n.ry + IDLE_A * Math.cos(t * IDLE_W * 1.28 + n.phase * 0.77);
 
-        const k  = dragged ? K_DRAG : K_IDLE;
-        const tx = dragged ? mouse.x : n.rx + IDLE_A * Math.sin(t * IDLE_W + n.phase);
-        const ty = dragged ? mouse.y : n.ry + IDLE_A * Math.cos(t * IDLE_W * 1.28 + n.phase * 0.77);
-
-        n.vx += k * (tx - n.x);
-        n.vy += k * (ty - n.y);
+        n.vx += K_IDLE * (tx - n.x);
+        n.vy += K_IDLE * (ty - n.y);
         n.vx *= DAMP; n.vy *= DAMP;
         n.x  += n.vx; n.y  += n.vy;
 
         // Boundary bounce. Top bound follows the title-clear zone computed in
-        // layout() (skipped while dragging — dragging under the title on
-        // purpose is allowed). Bottom keeps extra clearance for the name label.
+        // layout(). Bottom keeps extra clearance for the name label.
         const m = n.r + 18;
-        const topM = dragged ? m : Math.max(m, s.topBound);
+        const topM = Math.max(m, s.topBound);
         const mBottom = n.r + 30;
         if (n.x < m)             { n.x = m;             n.vx =  Math.abs(n.vx) * 0.35; }
         if (n.x > s.w - m)       { n.x = s.w - m;       n.vx = -Math.abs(n.vx) * 0.35; }
@@ -208,8 +197,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
           const min = (a.r + b.r) * 1.22;
           if (d < min) {
             const f = (min - d) * REP / d;
-            if (s.dragIdx !== i) { a.vx -= dx*f; a.vy -= dy*f; }
-            if (s.dragIdx !== j) { b.vx += dx*f; b.vy += dy*f; }
+            a.vx -= dx*f; a.vy -= dy*f;
+            b.vx += dx*f; b.vy += dy*f;
           }
         }
       }
@@ -301,8 +290,6 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.fillText("What I Work With", titleX, 116);
       ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
-      const hint = isMobile ? "Drag a node to rearrange." : "Drag any node to rearrange — the field responds.";
-      ctx.fillText(hint, titleX, 116 + headlineSize + 10);
       ctx.restore();
 
       // --- Ripple rings ---
@@ -328,12 +315,12 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       // --- Skill orbs ---
       for (const node of nodes) {
         const c = col(node.status);
-        const { x, y, lift } = node;
-        const r  = node.r * (1 + lift * 0.14);
+        const { x, y } = node;
+        const r  = node.r;
 
         // Outer atmosphere halo
         const atm = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 2.9);
-        atm.addColorStop(0, `${c.a}${(0.14 + lift*0.06).toFixed(3)})`);
+        atm.addColorStop(0, `${c.a}${(0.14).toFixed(3)})`);
         atm.addColorStop(0.45, `${c.a}0.04)`);
         atm.addColorStop(1, "transparent");
         ctx.fillStyle = atm;
@@ -345,7 +332,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
         // Energy colour wash
         const energy = ctx.createRadialGradient(x - r*0.22, y - r*0.28, 0, x, y, r);
-        energy.addColorStop(0, `${c.a}${(0.30 + lift*0.08).toFixed(3)})`);
+        energy.addColorStop(0, `${c.a}${0.30.toFixed(3)})`);
         energy.addColorStop(0.5, `${c.a}0.13)`);
         energy.addColorStop(1, `${c.a}0.04)`);
         ctx.fillStyle = energy;
@@ -368,8 +355,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
         // Ring
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `${c.a}${(0.38 + lift*0.28).toFixed(3)})`;
-        ctx.lineWidth = 1 + lift * 0.6;
+        ctx.strokeStyle = `${c.a}${0.38.toFixed(3)})`;
+        ctx.lineWidth = 1;
         ctx.stroke();
 
         // Thin inner rim (depth)
@@ -443,78 +430,18 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       s.raf = requestAnimationFrame(loop);
     }
 
-    // --- Events ---------------------------------------------------------
-    function clientPos(e: MouseEvent | TouchEvent) {
-      const rect = canvas.getBoundingClientRect();
-      const src  = "touches" in e ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-      return { x: src.clientX - rect.left, y: src.clientY - rect.top };
-    }
-    function hit(x: number, y: number) {
-      for (let i = s.nodes.length - 1; i >= 0; i--) {
-        const n = s.nodes[i];
-        const dx = x - n.x, dy = y - n.y;
-        if (dx*dx + dy*dy < (n.r * 1.3) ** 2) return i;
-      }
-      return -1;
-    }
-    function onDown(e: MouseEvent | TouchEvent) {
-      const p = clientPos(e);
-      const i = hit(p.x, p.y);
-      if (i < 0) return;
-      e.preventDefault();
-      s.dragIdx = i; s.mouse = p;
-      canvas.style.cursor = "grabbing";
-    }
-    function onMove(e: MouseEvent | TouchEvent) {
-      const p = clientPos(e);
-      s.mouse = p;
-      if (s.dragIdx < 0)
-        canvas.style.cursor = hit(p.x, p.y) >= 0 ? "grab" : "default";
-    }
-    function onUp() {
-      if (s.dragIdx < 0) return;
-      const n = s.nodes[s.dragIdx];
-      n.rx = n.x; n.ry = n.y;
-      s.ripples.push({
-        cx: n.x, cy: n.y,
-        born: performance.now(),
-        dur: 2000,
-        maxR: Math.min(s.w, s.h) * 0.65,
-        ca: col(n.status).a,
-      });
-      s.dragIdx = -1;
-      canvas.style.cursor = "default";
-    }
-
     // Init
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0 });
     io.observe(canvas);
-    canvas.addEventListener("mousedown", onDown);
-    canvas.addEventListener("touchstart", onDown, { passive: false });
-    window.addEventListener("mousemove", onMove);
-    // Passive: onMove never calls preventDefault — the drag gesture is already
-    // kept from scrolling the page via `touch-action: none` on the canvas
-    // itself. A non-passive listener here forced the browser to wait on this
-    // (global, window-level) handler before every scroll could start, which
-    // is what made scrolling feel laggy on mobile everywhere on the page.
-    window.addEventListener("touchmove", onMove, { passive: true });
-    window.addEventListener("mouseup",  onUp);
-    window.addEventListener("touchend", onUp);
     s.raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(s.raf);
       ro.disconnect();
       io.disconnect();
-      canvas.removeEventListener("mousedown", onDown);
-      canvas.removeEventListener("touchstart", onDown);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("mouseup",  onUp);
-      window.removeEventListener("touchend", onUp);
     };
   }, [skills]);
 
@@ -522,7 +449,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     <canvas
       ref={cvs}
       className="w-full block h-[460px] sm:h-[520px] md:h-[600px]"
-      style={{ touchAction: "none" }}
+      style={{ touchAction: "pan-y" }}
     />
   );
 }
