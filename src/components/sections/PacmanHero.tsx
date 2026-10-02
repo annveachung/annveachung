@@ -32,6 +32,17 @@ export function PacmanHero() {
   const scaleRef    = useRef(1);
   const phaseRef    = useRef<Phase>("normal");
   const rafRef      = useRef(0);
+  const rootRef     = useRef<HTMLDivElement>(null);
+  const visibleRef  = useRef(true);
+
+  // Skip the per-frame animation (4 setStates/frame) while scrolled away.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { visibleRef.current = e.isIntersecting; });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // ── particle spawn effect: animate out one frame after mount ──────────────
   useEffect(() => {
@@ -87,7 +98,7 @@ export function PacmanHero() {
       const dt = last === 0 ? 0 : Math.min((now - last) / 1000, 0.1);
       last = now;
 
-      if (phaseRef.current === "normal") {
+      if (phaseRef.current === "normal" && visibleRef.current) {
         let s = scaleRef.current;
         s = hoveringRef.current
           ? Math.min(MAX_SCALE, s + GROW_RATE * dt)
@@ -130,7 +141,7 @@ export function PacmanHero() {
   const isSpawn = phase === "spawning";
 
   return (
-    <div className="flex flex-col items-center gap-3 select-none">
+    <div ref={rootRef} className="flex flex-col items-center gap-3 select-none">
       {/* Pacman container — stays 64×64 in layout; SVG overflows visually */}
       <div
         className="relative"
