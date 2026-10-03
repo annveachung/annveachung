@@ -4,8 +4,6 @@
 // Layout is generated with a SEEDED PRNG so server and client render identically
 // (no hydration mismatch) while still looking organic.
 
-import { PauseOffscreen } from "@/components/sections/PauseOffscreen";
-
 // "Hello" in many languages (native scripts where natural).
 const SALUTATIONS = [
   "Hello", "Hi", "Hey", "你好", "您好", "早安", "こんにちは", "おはよう",
@@ -118,7 +116,6 @@ const BUBBLES = buildBubbles();
 export function FloatingLanguages() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      <PauseOffscreen />
       {BUBBLES.map((b, i) => (
         <div
           key={i}
