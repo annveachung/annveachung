@@ -1,14 +1,15 @@
 import type { SiteData } from "@/lib/data";
-import { skillIcon } from "@/lib/skillIcons";
+import { skillIcons } from "@/lib/skillIcons";
 import { SkillsField } from "@/components/sections/SkillsField";
 
 type Node = SiteData["treeNodes"][number];
 
 export function Skills({ nodes }: { nodes: Node[] }) {
-  const skills = nodes
+  const sorted = nodes
     .filter((n) => n.category === "skill")
-    .sort((a, b) => a.order - b.order)
-    .map((n) => ({ ...n, glyph: skillIcon(n.title) }));
+    .sort((a, b) => a.order - b.order);
+  const glyphs = skillIcons(sorted.map((n) => n.title));
+  const skills = sorted.map((n, i) => ({ ...n, glyph: glyphs[i] }));
 
   if (skills.length === 0) return null;
 

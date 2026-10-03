@@ -96,12 +96,38 @@ function lucidePath(name: string): string {
   return nodes.map(([t, a]) => nodeToPath(t, a)).join("");
 }
 
-export function skillIcon(title: string): SkillIcon {
+// Pool of generic icons for skills with neither a brand logo nor a keyword hit.
+const POOL = [
+  "Sparkles", "Hexagon", "Layers", "Blocks", "Boxes", "Workflow", "Compass", "Rocket",
+  "Lightbulb", "Puzzle", "Atom", "Gem", "Zap", "Orbit", "Wrench", "Cog", "Telescope",
+  "Anchor", "Feather", "Flame", "Leaf", "Star", "Shapes", "Component", "Waypoints",
+  "Infinity", "Hammer", "Magnet", "Crown", "Key", "Target", "Triangle", "Diamond",
+  "Pyramid", "Mountain", "Sun", "Moon", "Snowflake", "Dna",
+];
+
+function hashStr(str: string) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+
+// Resolve icons for a whole list of skills at once so that skills without a
+// brand logo never share the same generic icon (until the pool runs out).
+export function skillIcons(titles: string[]): SkillIcon[] {
   index ??= build();
-  const key = norm(title);
-  const hit = index.get(key) ?? index.get(ALIASES[key] ?? "");
-  if (hit) return { path: hit.path, stroke: false };
-  const t = title.toLowerCase();
-  const match = GENERIC.find(([re]) => re.test(t));
-  return { path: lucidePath(match ? match[1] : "Sparkles"), stroke: true };
+  const used = new Set<string>();
+  return titles.map((title) => {
+    const hit = index!.get(norm(title)) ?? index!.get(ALIASES[norm(title)] ?? "");
+    if (hit) return { path: hit.path, stroke: false };
+
+    const t = title.toLowerCase();
+    const start = hashStr(title) % POOL.length;
+    const candidates = [
+      ...GENERIC.filter(([re]) => re.test(t)).map(([, name]) => name),
+      ...POOL.map((_, k) => POOL[(start + k) % POOL.length]),
+    ];
+    const name = candidates.find((c) => !used.has(c)) ?? candidates[0];
+    used.add(name);
+    return { path: lucidePath(name), stroke: true };
+  });
 }
