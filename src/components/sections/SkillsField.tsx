@@ -56,7 +56,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
   useEffect(() => {
     const canvas = cvs.current!;
     const s = S.current;
-    s.dpr = window.devicePixelRatio || 1;
+    s.dpr = Math.min(2, window.devicePixelRatio || 1); // 3x canvases are costly on phones
 
     // --- Layout ---------------------------------------------------------
     // Free-roaming field (tablet/desktop). The canvas grows with the number of
@@ -269,8 +269,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       // --- Deformable line grid (convex spacetime curvature) ---
       const GX = 36, GY = 22;
       const cw = w / GX, ch = h / GY;
-      const STEPS_H = 72;
-      const STEPS_V = 46;
+      const STEPS_H = s.compact ? 36 : 72;
+      const STEPS_V = s.compact ? 24 : 46;
 
       ctx.lineWidth = 0.65;
 

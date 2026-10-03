@@ -18,7 +18,7 @@ interface Particle { id: number; tx: number; ty: number; color: string; size: nu
 type Phase = "normal" | "exploding" | "spawning";
 
 // ─── component ────────────────────────────────────────────────────────────────
-export function PacmanHero() {
+export function PacmanHero({ lite = false }: { lite?: boolean }) {
   const [scale,     setScale    ] = useState(1);
   const [mouth,     setMouth    ] = useState(28);
   const [shakeX,    setShakeX   ] = useState(0);
@@ -32,6 +32,17 @@ export function PacmanHero() {
   const scaleRef    = useRef(1);
   const phaseRef    = useRef<Phase>("normal");
   const rafRef      = useRef(0);
+  const rootRef     = useRef<HTMLDivElement>(null);
+  const visibleRef  = useRef(true);
+
+  // Skip the per-frame animation (several setStates/frame) while scrolled away.
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { visibleRef.current = e.isIntersecting; });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // ── particle spawn effect: animate out one frame after mount ──────────────
   useEffect(() => {
@@ -81,13 +92,18 @@ export function PacmanHero() {
 
   // ── RAF animation loop ────────────────────────────────────────────────────
   useEffect(() => {
+    // Phones/tablets: no per-frame animation and no grow-on-hover (there is no
+    // hover on touch). Pac-Man stays a static, open-mouthed sprite so the hero
+    // renders fast. Desktop keeps the full interactive version.
+    if (lite || window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
     let last = 0;
 
     function tick(now: number) {
       const dt = last === 0 ? 0 : Math.min((now - last) / 1000, 0.1);
       last = now;
 
-      if (phaseRef.current === "normal") {
+      if (phaseRef.current === "normal" && visibleRef.current) {
         let s = scaleRef.current;
         s = hoveringRef.current
           ? Math.min(MAX_SCALE, s + GROW_RATE * dt)
@@ -122,7 +138,7 @@ export function PacmanHero() {
 
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [doExplode]);
+  }, [doExplode, lite]);
 
   // ── derived values ────────────────────────────────────────────────────────
   const glowPx  = Math.max(0, (scale - 1) * 7);
@@ -130,7 +146,7 @@ export function PacmanHero() {
   const isSpawn = phase === "spawning";
 
   return (
-    <div className="flex flex-col items-center gap-3 select-none">
+    <div ref={rootRef} className="flex flex-col items-center gap-3 select-none">
       {/* Pacman container — stays 64×64 in layout; SVG overflows visually */}
       <div
         className="relative"

@@ -19,6 +19,12 @@ export function SmoothScroll() {
       return;
     }
 
+    // Phones/tablets: keep native scrolling. Lenis' syncTouch re-implements
+    // touch momentum in JS, which fights the browser and feels laggy on iOS.
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) {
+      return;
+    }
+
     const lenis = new Lenis({
       // Higher duration + gentle ease = longer inertia glide between sections.
       duration: 1.25,

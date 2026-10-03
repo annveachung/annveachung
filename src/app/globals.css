@@ -270,7 +270,6 @@ body {
 .bubble-anchor {
   position: absolute;
   transform: translate(-50%, -50%);
-  will-change: transform;
 }
 
 .bubble-float {
@@ -378,6 +377,62 @@ body {
     rgba(13, 21, 24, 0.72) 42%,
     transparent 72%
   );
+}
+
+/* Touch devices / phones: backdrop-filter on ~55 moving layers (plus the
+   frosted navbar) is what makes scrolling crawl. Use flat, slightly more
+   opaque fills and no permanent GPU layers instead. */
+@media (hover: none), (max-width: 768px) {
+  .bubble {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(25, 33, 36, 0.62);
+    box-shadow: none;
+  }
+  .bubble::after {
+    display: none;
+  }
+  .bubble-float {
+    will-change: auto;
+  }
+  .navbar-frosted {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(18, 24, 27, 0.88);
+  }
+  .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(25, 33, 36, 0.85);
+  }
+}
+
+/* Phones ONLY: the language bubbles are fully static and non-interactive so
+   the hero renders and returns instantly (no animation layers, no hover). Most
+   bubbles are left out as well. Tablets and desktops keep everything. */
+@media (hover: none) and (pointer: coarse) and (max-width: 768px) {
+  .bubble-float {
+    animation: none !important;
+  }
+  .bubble {
+    pointer-events: none !important;
+    cursor: default;
+    transition: none;
+  }
+  .bubble-extra {
+    display: none;
+  }
+  /* Fixed bar over a scrolling hero: a live blur re-renders every frame. */
+  .navbar-frosted {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(18, 24, 27, 0.94);
+  }
+  /* One system font instead of six web fonts (also avoids downloading them). */
+  .bubble {
+    font-family: var(--font-geist), system-ui, sans-serif !important;
+    font-style: normal !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -666,4 +721,19 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .gallery-card-overlay { transition: opacity 0.2s ease; transform: none; }
+}
+
+/* Server-rendered phone hero: flat, static, one system font. */
+.bubble-static {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  background: rgba(25, 33, 36, 0.62);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  pointer-events: none;
+  cursor: default;
+  transition: none;
+}
+.bubble-static::after {
+  display: none;
 }

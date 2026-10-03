@@ -113,13 +113,54 @@ function buildBubbles(): Bubble[] {
 // Generated once at module load — deterministic, so SSR === CSR.
 const BUBBLES = buildBubbles();
 
-export function FloatingLanguages() {
+// Which bubbles survive on phones: the larger ones plus a few small ones.
+const keepOnPhone = (b: Bubble, i: number) =>
+  b.size >= 30 || (b.size >= 20 && i % 3 !== 0) || (b.size < 20 && i % 6 === 0);
+
+export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
+  // Phones: a handful of plain, static, non-interactive pills — no animation
+  // wrappers, no hover, no GPU layers — so the hero renders and returns fast.
+  if (lite) {
+    return (
+      // Plain, flat HTML: no transforms, opacity, filters or animations anywhere,
+      // so nothing is promoted to its own GPU layer — the chips are painted into
+      // the normal page layer like any other text.
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {BUBBLES.map((b, i) =>
+          keepOnPhone(b, i) ? (
+            <div
+              key={i}
+              className="pointer-events-none"
+              style={{
+                position: "absolute",
+                top: `${b.top}%`,
+                left: `${b.left}%`,
+                width: 0,
+                height: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span
+                className="bubble bubble-static flex-none"
+                style={{ fontSize: `${b.size}px`, color: `rgba(219,228,232,${b.opacity})` }}
+              >
+                {b.text}
+              </span>
+            </div>
+          ) : null,
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {BUBBLES.map((b, i) => (
         <div
           key={i}
-          className="bubble-anchor pointer-events-none"
+          className={`bubble-anchor pointer-events-none ${b.size < 20 ? "bubble-sm" : ""} ${(b.size < 20 && i % 6 !== 0) || (b.size >= 20 && b.size < 30 && i % 3 === 0) ? "bubble-extra" : ""}`}
           style={{ top: `${b.top}%`, left: `${b.left}%` }}
         >
           <div

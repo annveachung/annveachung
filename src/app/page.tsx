@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
@@ -14,12 +15,16 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const data = await getSiteData();
+  // Phones get a static, lightweight hero (decided server-side so the markup
+  // itself is cheap — no reliance on CSS media queries or client JS).
+  const ua = (await headers()).get("user-agent") ?? "";
+  const phone = /iPhone|iPod|Android.+Mobile|Windows Phone/i.test(ua);
 
   return (
     <div className="bg-background min-h-screen">
       <Navbar settings={data.settings} navLinks={data.navLinks} />
       <main>
-        <Hero settings={data.settings} />
+        <Hero settings={data.settings} phone={phone} />
         <div aria-hidden className="h-24 bg-gradient-to-b from-background to-surface-variant" />
         <SkillTree nodes={data.treeNodes} />
         <div aria-hidden className="h-24 bg-gradient-to-b from-surface-variant to-surface-deep" />
