@@ -5,14 +5,16 @@ import type { SiteData } from "@/lib/data";
 
 type TreeNode = SiteData["treeNodes"][number] & { glyph?: { path: string; stroke: boolean } | null };
 
-// --- Colour palette per status -----------------------------------------
-const PAL = {
-  completed: { a: "rgba(143,224,220,", hex: "#8fe0dc" },
-  learning:  { a: "rgba(255,239,192,", hex: "#ffefc0" },
-  planned:   { a: "rgba(178,200,215,", hex: "#b2c8d7" },
-} as const;
-type StatusKey = keyof typeof PAL;
-function col(status: string) { return PAL[status as StatusKey] ?? PAL.completed; }
+// --- Colour palette -----------------------------------------------------
+// Soft pastels drawn from the site theme (turquoise + buttery yellow as the
+// anchors, with slate, sea-glass, sand and lilac as supporting tones). Each
+// orb gets one, cycling through in order so neighbours differ.
+const HEXES = ["#8fe0dc", "#ffefc0", "#b2c8d7", "#a8e6c3", "#f2cfae", "#c3c4f0", "#f0bcc4"];
+interface Tint { a: string; hex: string }
+const PAL: Tint[] = HEXES.map((hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return { hex, a: `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},` };
+});
 
 // --- Physics constants --------------------------------------------------
 const SPEED   = 0.55;    // base drift speed (px per 60fps tick)
@@ -32,7 +34,7 @@ function monogram(label: string) {
 
 // --- Internal types -----------------------------------------------------
 interface PNode {
-  id: string; label: string; status: string; icon: Path2D | null; stroked: boolean;
+  id: string; label: string; tint: Tint; icon: Path2D | null; stroked: boolean;
   x: number;  y: number;  vx: number; vy: number;
   r: number;
 }
@@ -84,7 +86,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         const y = loY + Math.random() * Math.max(1, hiY - loY);
         const ang = Math.random() * Math.PI * 2;
         const sp = SPEED * (0.7 + Math.random() * 0.6);
-        return { id: sk.id, label: sk.title, status: sk.status,
+        return { id: sk.id, label: sk.title, tint: PAL[i % PAL.length],
                  icon: sk.glyph ? new Path2D(sk.glyph.path) : null,
                  stroked: !!sk.glyph?.stroke,
                  x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r };
@@ -264,7 +266,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
       // --- Skill orbs ---
       for (const node of nodes) {
-        const c = col(node.status);
+        const c = node.tint;
         const { x, y } = node;
         const r  = node.r;
 
@@ -326,7 +328,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.lineWidth = 1.5; ctx.lineCap = "round"; ctx.stroke(); ctx.lineCap = "butt";
 
         if (node.icon) {
-          // 24x24 viewBox path (brand logo filled, generic icon stroked), tinted to the status colour.
+          // 24x24 viewBox path (brand logo filled, generic icon stroked), tinted to the orb colour.
           const size = r * 1.05;
           ctx.save();
           ctx.translate(x - size / 2, y - size / 2);
