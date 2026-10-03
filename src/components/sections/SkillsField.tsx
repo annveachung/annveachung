@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { SiteData } from "@/lib/data";
 
-type TreeNode = SiteData["treeNodes"][number] & { iconPath?: string | null };
+type TreeNode = SiteData["treeNodes"][number] & { glyph?: { path: string; stroke: boolean } | null };
 
 // --- Colour palette per status -----------------------------------------
 const PAL = {
@@ -32,7 +32,7 @@ function monogram(label: string) {
 
 // --- Internal types -----------------------------------------------------
 interface PNode {
-  id: string; label: string; status: string; icon: Path2D | null;
+  id: string; label: string; status: string; icon: Path2D | null; stroked: boolean;
   x: number;  y: number;  vx: number; vy: number;
   r: number;
 }
@@ -85,7 +85,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         const ang = Math.random() * Math.PI * 2;
         const sp = SPEED * (0.7 + Math.random() * 0.6);
         return { id: sk.id, label: sk.title, status: sk.status,
-                 icon: sk.iconPath ? new Path2D(sk.iconPath) : null,
+                 icon: sk.glyph ? new Path2D(sk.glyph.path) : null,
+                 stroked: !!sk.glyph?.stroke,
                  x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r };
       });
       for (let pass = 0; pass < 60; pass++) {
@@ -325,13 +326,19 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.lineWidth = 1.5; ctx.lineCap = "round"; ctx.stroke(); ctx.lineCap = "butt";
 
         if (node.icon) {
-          // Simple Icons path (24x24 viewBox), tinted to the status colour.
+          // 24x24 viewBox path (brand logo filled, generic icon stroked), tinted to the status colour.
           const size = r * 1.05;
           ctx.save();
           ctx.translate(x - size / 2, y - size / 2);
           ctx.scale(size / 24, size / 24);
-          ctx.fillStyle = c.hex;
-          ctx.fill(node.icon);
+          if (node.stroked) {
+            ctx.strokeStyle = c.hex; ctx.lineWidth = 1.6;
+            ctx.lineCap = "round"; ctx.lineJoin = "round";
+            ctx.stroke(node.icon);
+          } else {
+            ctx.fillStyle = c.hex;
+            ctx.fill(node.icon);
+          }
           ctx.restore();
         } else {
           ctx.textAlign = "center";
