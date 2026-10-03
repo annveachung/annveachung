@@ -15,27 +15,14 @@ type StatusKey = keyof typeof PAL;
 function col(status: string) { return PAL[status as StatusKey] ?? PAL.completed; }
 
 // --- Physics constants --------------------------------------------------
-const K_IDLE  = 0.038;   // idle spring stiffness
-const K_DRAG  = 0.30;    // drag spring stiffness
-const DAMP    = 0.87;    // velocity damping per tick
-const REP     = 0.13;    // node repulsion strength
-const IDLE_A  = 9;       // idle float amplitude (px)
-const IDLE_W  = 0.00055; // idle float frequency (rad/ms)
+const SPEED   = 0.55;    // base drift speed (px per 60fps tick)
 const SIGMA   = 120;     // Gaussian sigma for field wells
 
 // --- Internal types -----------------------------------------------------
 interface PNode {
   id: string; label: string; status: string;
   x: number;  y: number;  vx: number; vy: number;
-  rx: number; ry: number; // rest/drop position
   r: number;
-  phase: number;
-  lift: number; // 0..1 — animated when dragged
-}
-interface Ripple {
-  cx: number; cy: number;
-  born: number; dur: number; maxR: number;
-  ca: string; // colour alpha prefix
 }
 
 // --- Component ----------------------------------------------------------
@@ -43,10 +30,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
   const cvs = useRef<HTMLCanvasElement>(null);
   const S   = useRef({
     nodes:   [] as PNode[],
-    ripples: [] as Ripple[],
-    dragIdx: -1,
-    mouse:   { x: 0, y: 0 },
     raf:     0,
+    last:    0,
     w: 0, h: 0, dpr: 1,
     topBound: 0, bottomBound: 0,
   });
@@ -69,8 +54,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
     // --- Layout ---------------------------------------------------------
     function layout(w: number, h: number) {
-      const n  = skills.length;
-      if (!n) return;
+      if (!skills.length) return;
       const r  = Math.max(36, Math.min(52, Math.floor(Math.min(w, h) * 0.12)));
 
       // Keep the golden-angle spiral clear of the title block (mirrors the
@@ -84,47 +68,41 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       const yTop = Math.min(titleBottom + r, h * 0.55);
       const yBottom = h - r - 40;
 
-      const cx = w / 2;
-      const cy = (yTop + yBottom) / 2;
-      const spread = Math.min(w * 0.38, Math.max(40, (yBottom - yTop) / 2));
-
-      // Physics boundary bounce (below) reads these so idle drift / node
-      // repulsion can never push a node back up under the title either.
+      // Physics boundary bounce (below) reads these so drifting nodes can
+      // never travel back up under the title.
       s.topBound = yTop;
       s.bottomBound = yBottom;
 
+      // Scatter bubbles across the whole field (no central gathering), then
+      // push overlaps apart. Each starts with a random drift direction.
+      const loX = r + 18, hiX = w - r - 18;
+      const loY = yTop, hiY = h - r - 30;
+      const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
       s.nodes = skills.map((sk, i) => {
-        const θ = i * 2.39996; // golden angle
-        const ρ = spread * Math.sqrt((i + 0.5) / n);
-        let rx = cx + ρ * Math.cos(θ);
-        let ry = cy + ρ * Math.sin(θ);
-        rx = Math.max(r + 28, Math.min(w - r - 28, rx));
-        ry = Math.max(yTop, Math.min(yBottom, ry));
+        const x = loX + Math.random() * Math.max(1, hiX - loX);
+        const y = loY + Math.random() * Math.max(1, hiY - loY);
+        const ang = Math.random() * Math.PI * 2;
+        const sp = SPEED * (0.7 + Math.random() * 0.6);
         return { id: sk.id, label: sk.title, status: sk.status,
-                 x: rx, y: ry, vx: 0, vy: 0, rx, ry,
-                 r, phase: (i * 1.618) % (Math.PI * 2), lift: 0 };
+                 x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r };
       });
-
-      // Separation passes — push overlapping rest positions apart
-      for (let pass = 0; pass < 90; pass++) {
+      for (let pass = 0; pass < 60; pass++) {
         for (let i = 0; i < s.nodes.length; i++) {
           for (let j = i + 1; j < s.nodes.length; j++) {
             const a = s.nodes[i], b = s.nodes[j];
-            const dx = b.rx - a.rx, dy = b.ry - a.ry;
+            const dx = b.x - a.x, dy = b.y - a.y;
             const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
-            const min = (a.r + b.r) * 1.32;
+            const min = a.r + b.r;
             if (d < min) {
               const p = (min - d) * 0.5 / d;
-              a.rx -= dx * p; a.ry -= dy * p;
-              b.rx += dx * p; b.ry += dy * p;
-              const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-              a.rx = clamp(a.rx, a.r+28, w-a.r-28); a.ry = clamp(a.ry, yTop, yBottom);
-              b.rx = clamp(b.rx, b.r+28, w-b.r-28); b.ry = clamp(b.ry, yTop, yBottom);
+              a.x -= dx * p; a.y -= dy * p;
+              b.x += dx * p; b.y += dy * p;
+              a.x = clamp(a.x, loX, hiX); a.y = clamp(a.y, loY, hiY);
+              b.x = clamp(b.x, loX, hiX); b.y = clamp(b.y, loY, hiY);
             }
           }
         }
       }
-      s.nodes.forEach(n => { n.x = n.rx; n.y = n.ry; });
     }
 
     function resize() {
@@ -146,81 +124,58 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ddx -= 34 * rx / SIGMA * wt;
         ddy -= 34 * ry / SIGMA * wt;
       }
-      // Ripple: radially outward wave
-      for (const rip of s.ripples) {
-        const age = t - rip.born, prog = age / rip.dur;
-        if (prog >= 1) continue;
-        const rx = px - rip.cx, ry = py - rip.cy;
-        const dist = Math.sqrt(rx*rx + ry*ry);
-        if (dist < 1) continue;
-        const front = prog * rip.maxR;
-        const diff  = dist - front;
-        if (Math.abs(diff) < 72) {
-          const amp = Math.sin(diff * 0.088) * (1 - prog) * 9 * Math.exp(-dist / (rip.maxR * 0.62));
-          ddx += amp * rx / dist;
-          ddy += amp * ry / dist;
-        }
-      }
       // Gentle vertical undulation
       ddy += 4 * Math.sin(px / 165 + t * 0.00027) * Math.cos(py / 210 + t * 0.00022);
       return [ddx, ddy];
     }
 
     // --- Physics tick ---------------------------------------------------
+    // Bubbles drift at constant speed, bounce off the walls and off each other
+    // (equal-mass elastic collisions).
     function physics(t: number) {
-      const { nodes, mouse, dragIdx } = s;
+      const { nodes } = s;
+      const dt = s.last ? Math.min(2.5, (t - s.last) / 16.67) : 1;
+      s.last = t;
 
-      for (let i = 0; i < nodes.length; i++) {
-        const n = nodes[i];
-        const dragged = i === dragIdx;
+      for (const n of nodes) {
+        n.x += n.vx * dt; n.y += n.vy * dt;
 
-        // Lift animation
-        const liftTarget = dragged ? 1 : 0;
-        n.lift += (liftTarget - n.lift) * 0.09;
-
-        const k  = dragged ? K_DRAG : K_IDLE;
-        const tx = dragged ? mouse.x : n.rx + IDLE_A * Math.sin(t * IDLE_W + n.phase);
-        const ty = dragged ? mouse.y : n.ry + IDLE_A * Math.cos(t * IDLE_W * 1.28 + n.phase * 0.77);
-
-        n.vx += k * (tx - n.x);
-        n.vy += k * (ty - n.y);
-        n.vx *= DAMP; n.vy *= DAMP;
-        n.x  += n.vx; n.y  += n.vy;
-
-        // Boundary bounce. Top bound follows the title-clear zone computed in
-        // layout() (skipped while dragging — dragging under the title on
-        // purpose is allowed). Bottom keeps extra clearance for the name label.
         const m = n.r + 18;
-        const topM = dragged ? m : Math.max(m, s.topBound);
         const mBottom = n.r + 30;
-        if (n.x < m)             { n.x = m;             n.vx =  Math.abs(n.vx) * 0.35; }
-        if (n.x > s.w - m)       { n.x = s.w - m;       n.vx = -Math.abs(n.vx) * 0.35; }
-        if (n.y < topM)          { n.y = topM;          n.vy =  Math.abs(n.vy) * 0.35; }
-        if (n.y > s.h - mBottom) { n.y = s.h - mBottom; n.vy = -Math.abs(n.vy) * 0.35; }
+        const topM = Math.max(m, s.topBound);
+        if (n.x < m)             { n.x = m;             n.vx =  Math.abs(n.vx); }
+        if (n.x > s.w - m)       { n.x = s.w - m;       n.vx = -Math.abs(n.vx); }
+        if (n.y < topM)          { n.y = topM;          n.vy =  Math.abs(n.vy); }
+        if (n.y > s.h - mBottom) { n.y = s.h - mBottom; n.vy = -Math.abs(n.vy); }
       }
 
-      // Soft repulsion between all node pairs
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
           const d  = Math.sqrt(dx*dx + dy*dy) || 0.001;
-          const min = (a.r + b.r) * 1.22;
+          const min = a.r + b.r;
           if (d < min) {
-            const f = (min - d) * REP / d;
-            if (s.dragIdx !== i) { a.vx -= dx*f; a.vy -= dy*f; }
-            if (s.dragIdx !== j) { b.vx += dx*f; b.vy += dy*f; }
+            const nx = dx / d, ny = dy / d;
+            // separate
+            const push = (min - d) / 2;
+            a.x -= nx * push; a.y -= ny * push;
+            b.x += nx * push; b.y += ny * push;
+            // exchange velocity along the normal if approaching
+            const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+            if (rel < 0) {
+              a.vx += rel * nx; a.vy += rel * ny;
+              b.vx -= rel * nx; b.vy -= rel * ny;
+            }
           }
         }
       }
-
-      s.ripples = s.ripples.filter(r => t - r.born < r.dur);
     }
 
     // --- Draw -----------------------------------------------------------
     function draw(t: number) {
       const ctx = canvas.getContext("2d")!;
-      const { w, h, dpr, nodes, ripples } = s;
+      const { w, h, dpr, nodes } = s;
       ctx.save();
       ctx.scale(dpr, dpr);
 
@@ -301,39 +256,18 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.fillText("What I Work With", titleX, 116);
       ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
-      const hint = isMobile ? "Drag a node to rearrange." : "Drag any node to rearrange — the field responds.";
-      ctx.fillText(hint, titleX, 116 + headlineSize + 10);
+      ctx.fillText("The tools and technologies I build with.", titleX, 116 + headlineSize + 10);
       ctx.restore();
-
-      // --- Ripple rings ---
-      for (const rip of ripples) {
-        const prog = (t - rip.born) / rip.dur;
-        if (prog >= 1) continue;
-        const ease = 1 - Math.pow(1 - prog, 3);
-        const r1 = ease * rip.maxR;
-        ctx.beginPath();
-        ctx.arc(rip.cx, rip.cy, r1, 0, Math.PI * 2);
-        ctx.strokeStyle = `${rip.ca}${((1 - prog) * 0.32).toFixed(3)})`;
-        ctx.lineWidth = 1.3;
-        ctx.stroke();
-        if (prog > 0.14) {
-          ctx.beginPath();
-          ctx.arc(rip.cx, rip.cy, (ease - 0.14) * rip.maxR * 0.8, 0, Math.PI * 2);
-          ctx.strokeStyle = `${rip.ca}${((1 - prog) * 0.14).toFixed(3)})`;
-          ctx.lineWidth = 0.7;
-          ctx.stroke();
-        }
-      }
 
       // --- Skill orbs ---
       for (const node of nodes) {
         const c = col(node.status);
-        const { x, y, lift } = node;
-        const r  = node.r * (1 + lift * 0.14);
+        const { x, y } = node;
+        const r  = node.r;
 
         // Outer atmosphere halo
         const atm = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 2.9);
-        atm.addColorStop(0, `${c.a}${(0.14 + lift*0.06).toFixed(3)})`);
+        atm.addColorStop(0, `${c.a}${(0.14).toFixed(3)})`);
         atm.addColorStop(0.45, `${c.a}0.04)`);
         atm.addColorStop(1, "transparent");
         ctx.fillStyle = atm;
@@ -345,7 +279,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
         // Energy colour wash
         const energy = ctx.createRadialGradient(x - r*0.22, y - r*0.28, 0, x, y, r);
-        energy.addColorStop(0, `${c.a}${(0.30 + lift*0.08).toFixed(3)})`);
+        energy.addColorStop(0, `${c.a}${(0.30).toFixed(3)})`);
         energy.addColorStop(0.5, `${c.a}0.13)`);
         energy.addColorStop(1, `${c.a}0.04)`);
         ctx.fillStyle = energy;
@@ -368,8 +302,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
         // Ring
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.strokeStyle = `${c.a}${(0.38 + lift*0.28).toFixed(3)})`;
-        ctx.lineWidth = 1 + lift * 0.6;
+        ctx.strokeStyle = `${c.a}${(0.38).toFixed(3)})`;
+        ctx.lineWidth = 1;
         ctx.stroke();
 
         // Thin inner rim (depth)
@@ -443,78 +377,18 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       s.raf = requestAnimationFrame(loop);
     }
 
-    // --- Events ---------------------------------------------------------
-    function clientPos(e: MouseEvent | TouchEvent) {
-      const rect = canvas.getBoundingClientRect();
-      const src  = "touches" in e ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-      return { x: src.clientX - rect.left, y: src.clientY - rect.top };
-    }
-    function hit(x: number, y: number) {
-      for (let i = s.nodes.length - 1; i >= 0; i--) {
-        const n = s.nodes[i];
-        const dx = x - n.x, dy = y - n.y;
-        if (dx*dx + dy*dy < (n.r * 1.3) ** 2) return i;
-      }
-      return -1;
-    }
-    function onDown(e: MouseEvent | TouchEvent) {
-      const p = clientPos(e);
-      const i = hit(p.x, p.y);
-      if (i < 0) return;
-      e.preventDefault();
-      s.dragIdx = i; s.mouse = p;
-      canvas.style.cursor = "grabbing";
-    }
-    function onMove(e: MouseEvent | TouchEvent) {
-      const p = clientPos(e);
-      s.mouse = p;
-      if (s.dragIdx < 0)
-        canvas.style.cursor = hit(p.x, p.y) >= 0 ? "grab" : "default";
-    }
-    function onUp() {
-      if (s.dragIdx < 0) return;
-      const n = s.nodes[s.dragIdx];
-      n.rx = n.x; n.ry = n.y;
-      s.ripples.push({
-        cx: n.x, cy: n.y,
-        born: performance.now(),
-        dur: 2000,
-        maxR: Math.min(s.w, s.h) * 0.65,
-        ca: col(n.status).a,
-      });
-      s.dragIdx = -1;
-      canvas.style.cursor = "default";
-    }
-
     // Init
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0 });
     io.observe(canvas);
-    canvas.addEventListener("mousedown", onDown);
-    canvas.addEventListener("touchstart", onDown, { passive: false });
-    window.addEventListener("mousemove", onMove);
-    // Passive: onMove never calls preventDefault — the drag gesture is already
-    // kept from scrolling the page via `touch-action: none` on the canvas
-    // itself. A non-passive listener here forced the browser to wait on this
-    // (global, window-level) handler before every scroll could start, which
-    // is what made scrolling feel laggy on mobile everywhere on the page.
-    window.addEventListener("touchmove", onMove, { passive: true });
-    window.addEventListener("mouseup",  onUp);
-    window.addEventListener("touchend", onUp);
     s.raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(s.raf);
       ro.disconnect();
       io.disconnect();
-      canvas.removeEventListener("mousedown", onDown);
-      canvas.removeEventListener("touchstart", onDown);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchmove", onMove);
-      window.removeEventListener("mouseup",  onUp);
-      window.removeEventListener("touchend", onUp);
     };
   }, [skills]);
 
@@ -522,7 +396,6 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     <canvas
       ref={cvs}
       className="w-full block h-[460px] sm:h-[520px] md:h-[600px]"
-      style={{ touchAction: "none" }}
     />
   );
 }
