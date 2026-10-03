@@ -1,4 +1,5 @@
 import type { SiteData } from "@/lib/data";
+import { skillIconPath } from "@/lib/skillIcons";
 import { SkillsField } from "@/components/sections/SkillsField";
 
 type Node = SiteData["treeNodes"][number];
@@ -6,7 +7,8 @@ type Node = SiteData["treeNodes"][number];
 export function Skills({ nodes }: { nodes: Node[] }) {
   const skills = nodes
     .filter((n) => n.category === "skill")
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => a.order - b.order)
+    .map((n) => ({ ...n, iconPath: skillIconPath(n.title) }));
 
   if (skills.length === 0) return null;
 

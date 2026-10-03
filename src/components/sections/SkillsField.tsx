@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { SiteData } from "@/lib/data";
 
-type TreeNode = SiteData["treeNodes"][number];
+type TreeNode = SiteData["treeNodes"][number] & { iconPath?: string | null };
 
 // --- Colour palette per status -----------------------------------------
 const PAL = {
@@ -18,9 +18,21 @@ function col(status: string) { return PAL[status as StatusKey] ?? PAL.completed;
 const SPEED   = 0.55;    // base drift speed (px per 60fps tick)
 const SIGMA   = 120;     // Gaussian sigma for field wells
 
+function hash(str: string) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function monogram(label: string) {
+  const words = label.split(/[\s/+&.-]+/).filter(Boolean);
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  const w = words[0] ?? "?";
+  return w.charAt(0).toUpperCase() + w.charAt(1).toLowerCase();
+}
+
 // --- Internal types -----------------------------------------------------
 interface PNode {
-  id: string; label: string; status: string;
+  id: string; label: string; status: string; icon: Path2D | null;
   x: number;  y: number;  vx: number; vy: number;
   r: number;
 }
@@ -40,17 +52,6 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     const canvas = cvs.current!;
     const s = S.current;
     s.dpr = window.devicePixelRatio || 1;
-
-    // Preload skill icons — drawn inside the orbs. Every icon renders in the
-    // same-size circle regardless of its source dimensions (cover-cropped).
-    const iconImgs = new Map<string, HTMLImageElement>();
-    for (const sk of skills) {
-      if (sk.icon) {
-        const im = new Image();
-        im.src = sk.icon;
-        iconImgs.set(sk.id, im);
-      }
-    }
 
     // --- Layout ---------------------------------------------------------
     function layout(w: number, h: number) {
@@ -84,6 +85,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         const ang = Math.random() * Math.PI * 2;
         const sp = SPEED * (0.7 + Math.random() * 0.6);
         return { id: sk.id, label: sk.title, status: sk.status,
+                 icon: sk.iconPath ? new Path2D(sk.iconPath) : null,
                  x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r };
       });
       for (let pass = 0; pass < 60; pass++) {
@@ -312,26 +314,31 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Icon (if uploaded) — uniform size across all orbs, cover-cropped to
-        // a circle. Uses the base radius so every icon is identical in size.
-        const icon = iconImgs.get(node.id);
-        if (icon && icon.complete && icon.naturalWidth > 0) {
-          const size = node.r * 1.15;
-          const scale = Math.max(size / icon.naturalWidth, size / icon.naturalHeight);
-          const dw = icon.naturalWidth * scale, dh = icon.naturalHeight * scale;
+        // Icon (or monogram fallback) — initials generated from the skill name, plus a small
+        // arc whose position/length is derived from the id so every orb is
+        // visually distinct without needing an uploaded icon.
+        const seed = hash(node.id);
+        const a0 = (seed % 360) * Math.PI / 180 + t * 0.0003 * (seed % 2 ? 1 : -1);
+        const sweep = 0.6 + ((seed >> 8) % 100) / 100 * 1.4;
+        ctx.beginPath(); ctx.arc(x, y, r - 5, a0, a0 + sweep);
+        ctx.strokeStyle = `${c.a}0.55)`;
+        ctx.lineWidth = 1.5; ctx.lineCap = "round"; ctx.stroke(); ctx.lineCap = "butt";
+
+        if (node.icon) {
+          // Simple Icons path (24x24 viewBox), tinted to the status colour.
+          const size = r * 1.05;
           ctx.save();
-          ctx.beginPath();
-          ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.drawImage(icon, x - dw / 2, y - dh / 2, dw, dh);
+          ctx.translate(x - size / 2, y - size / 2);
+          ctx.scale(size / 24, size / 24);
+          ctx.fillStyle = c.hex;
+          ctx.fill(node.icon);
           ctx.restore();
         } else {
-          // Fallback glyph (no icon uploaded) — first letter, name still labelled below.
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.font = `600 ${Math.floor(r * 0.55)}px -apple-system,"SF Pro Display",sans-serif`;
+          ctx.font = `600 ${Math.floor(r * 0.62)}px -apple-system,"SF Pro Display",sans-serif`;
           ctx.fillStyle = c.hex;
-          ctx.fillText(node.label.charAt(0).toUpperCase(), x, y + 1);
+          ctx.fillText(monogram(node.label), x, y + 1);
         }
 
         // Skill name — always shown below the orb (title field from the admin panel).

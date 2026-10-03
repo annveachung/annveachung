@@ -62,7 +62,7 @@ export default async function SkillTreePage() {
     <div>
       <PageHeader
         title="Skill Tree"
-        subtitle="Education, experience and skill nodes for the living-CV graph. For education & experience, Title is the role/degree; City and Institution/Company fill the card's other two lines. Skill nodes use Title and an uploaded icon (all icons render at the same size). Connect each node to its parent(s) to grow the tree."
+        subtitle="Education, experience and skill nodes for the living-CV graph. For education & experience, Title is the role/degree; City and Institution/Company fill the card's other two lines. Skill nodes only need a Title: a matching brand icon is picked automatically (e.g. React, Figma, PostgreSQL), otherwise the orb shows the skill's initials. Connect each node to its parent(s) to grow the tree."
       />
 
       <div className="flex flex-col gap-4">
