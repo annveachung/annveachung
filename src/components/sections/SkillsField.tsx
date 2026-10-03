@@ -37,6 +37,8 @@ interface PNode {
   id: string; label: string; tint: Tint; icon: Path2D | null; stroked: boolean;
   x: number;  y: number;  vx: number; vy: number;
   r: number;
+  hx: number; hy: number; // home position (compact layout)
+  phase: number;
 }
 
 // --- Component ----------------------------------------------------------
@@ -48,6 +50,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     last:    0,
     w: 0, h: 0, dpr: 1,
     topBound: 0, bottomBound: 0,
+    compact: false, // narrow screens: tidy grid with gentle bobbing instead of free-roaming bubbles
   });
 
   useEffect(() => {
@@ -56,9 +59,22 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     s.dpr = window.devicePixelRatio || 1;
 
     // --- Layout ---------------------------------------------------------
+    // Free-roaming field (tablet/desktop). The canvas grows with the number of
+    // skills so each bubble keeps its own breathing room (bubble + label +
+    // gap per skill) instead of getting packed into a fixed-height box.
+    const roamRadius = (w: number) => (w >= 1024 ? 46 : 40);
+    const GAP = 14;
+    function roamHeight(w: number): number {
+      const r = roamRadius(w);
+      const cell = (2 * r + GAP) * (2 * r + 34);
+      const usableW = Math.max(200, w - 2 * (r + 18));
+      const area = (skills.length * cell * 1.45) / usableW;
+      return Math.ceil(200 + area + EDGE_FADE + 40);
+    }
+
     function layout(w: number, h: number) {
       if (!skills.length) return;
-      const r  = Math.max(36, Math.min(52, Math.floor(Math.min(w, h) * 0.12)));
+      const r = roamRadius(w);
 
       // Keep the golden-angle spiral clear of the title block (mirrors the
       // headline sizing in draw()) so the default/rest layout never sits
@@ -89,7 +105,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         return { id: sk.id, label: sk.title, tint: PAL[i % PAL.length],
                  icon: sk.glyph ? new Path2D(sk.glyph.path) : null,
                  stroked: !!sk.glyph?.stroke,
-                 x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r };
+                 x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r,
+                 hx: x, hy: y, phase: i * 1.7 };
       });
       for (let pass = 0; pass < 60; pass++) {
         for (let i = 0; i < s.nodes.length; i++) {
@@ -97,7 +114,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
             const a = s.nodes[i], b = s.nodes[j];
             const dx = b.x - a.x, dy = b.y - a.y;
             const d  = Math.sqrt(dx * dx + dy * dy) || 0.001;
-            const min = a.r + b.r;
+            const min = a.r + b.r + GAP;
             if (d < min) {
               const p = (min - d) * 0.5 / d;
               a.x -= dx * p; a.y -= dy * p;
@@ -110,12 +127,51 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       }
     }
 
+    // Narrow screens: a tidy 3-column grid (staggered like a honeycomb) under
+    // the title. Orbs keep the same glass look and bob gently in place. The
+    // canvas grows to fit however many skills there are, so nothing is packed.
+    const COMPACT_MAX = 768;
+    const EDGE_FADE = 130;
+    function compactLayout(w: number): number {
+      const n = skills.length;
+      const cols = w < 340 ? 2 : 3;
+      const headlineSize = w < 480 ? 24 : 30;
+      const titleBottom = 116 + headlineSize + 10 + 12 + 24;
+      const colW = (w - 32) / cols;
+      const r = Math.max(26, Math.min(36, Math.floor(colW * 0.3)));
+      const rowH = r * 2 + 44;
+      const rows = Math.ceil(n / cols);
+      const y0 = titleBottom + 14 + r;
+      s.nodes = skills.map((sk, i) => {
+        const row = Math.floor(i / cols), col = i % cols;
+        const hx = 16 + colW * (col + 0.5);
+        const hy = y0 + row * rowH + (col % 2 ? rowH * 0.22 : 0);
+        return { id: sk.id, label: sk.title, tint: PAL[i % PAL.length],
+                 icon: sk.glyph ? new Path2D(sk.glyph.path) : null,
+                 stroked: !!sk.glyph?.stroke,
+                 x: hx, y: hy, vx: 0, vy: 0, r, hx, hy, phase: i * 1.7 };
+      });
+      s.topBound = 0; s.bottomBound = 0;
+      return Math.ceil(y0 + (rows - 1) * rowH + rowH * 0.22 + r + 40 + EDGE_FADE);
+    }
+
     function resize() {
       const rect = canvas.getBoundingClientRect();
-      s.w = rect.width; s.h = rect.height;
+      const w = rect.width;
+      s.compact = w < COMPACT_MAX && skills.length > 0;
+      if (s.compact) {
+        const needed = compactLayout(w);
+        canvas.style.height = `${needed}px`;
+        s.w = w; s.h = needed;
+      } else {
+        const base = w < 640 ? 460 : w < 768 ? 520 : 600;
+        const needed = Math.max(base, roamHeight(w));
+        canvas.style.height = needed > base ? `${needed}px` : "";
+        s.w = w; s.h = needed;
+      }
       canvas.width  = s.w * s.dpr;
       canvas.height = s.h * s.dpr;
-      layout(s.w, s.h);
+      if (!s.compact) layout(s.w, s.h);
     }
 
     // --- Grid displacement: radial warp around nodes --------------------
@@ -142,6 +198,14 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       const dt = s.last ? Math.min(2.5, (t - s.last) / 16.67) : 1;
       s.last = t;
 
+      if (s.compact) {
+        for (const n of nodes) {
+          n.x = n.hx + 7 * Math.sin(t * 0.0008 + n.phase);
+          n.y = n.hy + 7 * Math.cos(t * 0.00105 + n.phase * 0.8);
+        }
+        return;
+      }
+
       for (const n of nodes) {
         n.x += n.vx * dt; n.y += n.vy * dt;
 
@@ -159,7 +223,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
           const a = nodes[i], b = nodes[j];
           const dx = b.x - a.x, dy = b.y - a.y;
           const d  = Math.sqrt(dx*dx + dy*dy) || 0.001;
-          const min = a.r + b.r;
+          const min = a.r + b.r + GAP * 0.5;
           if (d < min) {
             const nx = dx / d, ny = dy / d;
             // separate

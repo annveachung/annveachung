@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/**": ["./node_modules/.prisma/client/**/*"],
   },
+  // Let phones on the local network (http://<LAN-ip>:3000) load the dev
+  // server's JS. Without this Next 16 blocks those requests, the page never
+  // hydrates, and every client-rendered section (timeline cards, Arsenal
+  // canvas, map) stays blank. Dev-only; has no effect on production.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "*.local"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
