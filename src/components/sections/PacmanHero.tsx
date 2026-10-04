@@ -145,6 +145,38 @@ export function PacmanHero({ lite = false }: { lite?: boolean }) {
   const isNorm  = phase === "normal";
   const isSpawn = phase === "spawning";
 
+  // Phones: chomping only — no growing, shaking or exploding, and no
+  // JavaScript per frame. Two half-discs swing open/closed (SVG animation).
+  if (lite) {
+    return (
+      <div className="flex flex-col items-center gap-3 select-none pointer-events-none">
+        <svg viewBox="0 0 100 100" width={64} height={64} className="overflow-visible" aria-hidden="true">
+          {/* SVG-native (SMIL) animation: works without any CSS being loaded. */}
+          <path d="M50,50 L90,50 A40,40 0 0 0 10,50 Z" fill={YELLOW}>
+            <animateTransform
+              attributeName="transform" type="rotate"
+              values="0 50 50;-34 50 50;0 50 50;0 50 50" keyTimes="0;0.3;0.6;1"
+              dur="0.8s" repeatCount="indefinite" calcMode="linear"
+            />
+          </path>
+          <path d="M50,50 L10,50 A40,40 0 0 0 90,50 Z" fill={YELLOW}>
+            <animateTransform
+              attributeName="transform" type="rotate"
+              values="0 50 50;34 50 50;0 50 50;0 50 50" keyTimes="0;0.3;0.6;1"
+              dur="0.8s" repeatCount="indefinite" calcMode="linear"
+            />
+          </path>
+        </svg>
+        <span
+          className="font-label text-[11px] tracking-[0.28em] uppercase"
+          style={{ color: "rgba(203,212,218,0.55)" }}
+        >
+          Based in Toronto
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div ref={rootRef} className="flex flex-col items-center gap-3 select-none">
       {/* Pacman container — stays 64×64 in layout; SVG overflows visually */}
