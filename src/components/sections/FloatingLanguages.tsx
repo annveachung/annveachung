@@ -117,6 +117,17 @@ const BUBBLES = buildBubbles();
 const keepOnPhone = (b: Bubble, i: number) =>
   b.size >= 30 || (b.size >= 20 && i % 3 !== 0) || (b.size < 20 && i % 6 === 0);
 
+// Phones: a few extra static chips in the top-left, which the filtered set
+// leaves bare. Greetings are picked from the ones NOT already shown on phones,
+// so nothing repeats.
+const SHOWN_ON_PHONE = new Set(BUBBLES.filter(keepOnPhone).map((b) => b.text));
+const EXTRA_TEXTS = SALUTATIONS.filter((t) => !SHOWN_ON_PHONE.has(t) && t.length <= 8);
+const PHONE_EXTRAS = [
+  { top: 15, left: 24, size: 20, opacity: 0.85 },
+  { top: 21, left: 46, size: 17, opacity: 0.7 },
+  { top: 22, left: 12, size: 15, opacity: 0.8 },
+].map((e, i) => ({ ...e, text: EXTRA_TEXTS[i] }));
+
 export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
   // Phones: a handful of plain, static, non-interactive pills — no animation
   // wrappers, no hover, no GPU layers — so the hero renders and returns fast.
@@ -151,6 +162,29 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
             </div>
           ) : null,
         )}
+        {PHONE_EXTRAS.map((e) => (
+          <div
+            key={e.text}
+            className="pointer-events-none"
+            style={{
+              position: "absolute",
+              top: `${e.top}%`,
+              left: `${e.left}%`,
+              width: 0,
+              height: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              className="bubble bubble-static flex-none"
+              style={{ fontSize: `${e.size}px`, color: `rgba(219,228,232,${e.opacity})` }}
+            >
+              {e.text}
+            </span>
+          </div>
+        ))}
       </div>
     );
   }
