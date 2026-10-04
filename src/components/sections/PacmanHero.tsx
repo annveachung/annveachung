@@ -29,6 +29,10 @@ export function PacmanHero({ lite = false }: { lite?: boolean }) {
   const [gen,       setGen      ] = useState(0);
 
   const hoveringRef = useRef(false);
+  // After an explosion the cursor is usually still over the respawned Pac-Man.
+  // Ignore it until the pointer actually leaves and comes back, otherwise he
+  // would grow and explode again in an endless loop.
+  const lockedRef   = useRef(false);
   const scaleRef    = useRef(1);
   const phaseRef    = useRef<Phase>("normal");
   const rafRef      = useRef(0);
@@ -53,6 +57,8 @@ export function PacmanHero({ lite = false }: { lite?: boolean }) {
 
   // ── explosion ─────────────────────────────────────────────────────────────
   const doExplode = useCallback(() => {
+    lockedRef.current = true;
+    hoveringRef.current = false;
     phaseRef.current = "exploding";
     setPhase("exploding");
 
@@ -183,8 +189,8 @@ export function PacmanHero({ lite = false }: { lite?: boolean }) {
       <div
         className="relative"
         style={{ width: 64, height: 64 }}
-        onMouseEnter={() => { hoveringRef.current = true; }}
-        onMouseLeave={() => { hoveringRef.current = false; }}
+        onMouseEnter={() => { hoveringRef.current = !lockedRef.current; }}
+        onMouseLeave={() => { hoveringRef.current = false; lockedRef.current = false; }}
       >
         {/* Explosion particles */}
         {particles.map(p => (
