@@ -160,7 +160,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
     >
       <div className="skilltree-aurora pointer-events-none absolute inset-0" />
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-16 pb-10">
+      <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-12 md:pt-16 pb-8 md:pb-10">
         <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
           Progression
         </span>
@@ -172,7 +172,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
         </p>
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto w-full px-margin-mobile md:px-margin-desktop pb-20">
+      <div className="relative z-10 max-w-5xl mx-auto w-full px-margin-mobile md:px-margin-desktop pb-8 md:pb-20">
         {/* Column labels — desktop only; mobile shows inline labels per column below */}
         <div className="hidden md:grid grid-cols-[1fr_80px_1fr] mb-5">
           <div className="text-right pr-5">

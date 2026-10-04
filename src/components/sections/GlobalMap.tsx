@@ -165,7 +165,7 @@ export function GlobalMap({
       </div>
 
       {/* Map */}
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-margin-mobile md:px-margin-desktop pb-12 pt-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-margin-mobile md:px-margin-desktop pb-6 md:pb-12 pt-6">
         <svg
           className="worldmap-svg w-full h-auto block"
           viewBox={viewBox}

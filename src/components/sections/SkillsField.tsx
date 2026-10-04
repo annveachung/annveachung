@@ -138,7 +138,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       const n = skills.length;
       const cols = w < 340 ? 2 : 3;
       const headlineSize = w < 480 ? 24 : 30;
-      const titleBottom = 116 + headlineSize + 10 + 12 + 24;
+      const titleBottom = 44 + headlineSize + 10 + 12 + 24; // compact: title sits close to the top
       const colW = (w - 32) / cols;
       const r = Math.max(26, Math.min(36, Math.floor(colW * 0.3)));
       const rowH = r * 2 + 44;
@@ -154,7 +154,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
                  x: hx, y: hy, vx: 0, vy: 0, r, hx, hy, phase: i * 1.7 };
       });
       s.topBound = 0; s.bottomBound = 0;
-      return Math.ceil(y0 + (rows - 1) * rowH + rowH * 0.22 + r + 40 + EDGE_FADE);
+      return Math.ceil(y0 + (rows - 1) * rowH + rowH * 0.22 + r + 36 + 14);
     }
 
     function resize() {
@@ -306,6 +306,25 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.stroke();
       }
 
+      // Edge fades (eased, so they read as a smooth gradient even when short —
+      // phones use a shorter one because the title sits closer to the top).
+      // On phones the bottom edge fades straight into the Whereabouts colour
+      // (#232b2e), linearly, so the section hand-off is one short gradient.
+      const FADE = s.compact ? 64 : 96;
+      const botRGB = s.compact ? "35,43,46" : "20,27,31";
+      const topFade = ctx.createLinearGradient(0, 0, 0, FADE);
+      const botFade = ctx.createLinearGradient(0, h - FADE, 0, h);
+      for (let i = 0; i <= 8; i++) {
+        const t = i / 8, k = t * t * (3 - 2 * t);
+        topFade.addColorStop(t, `rgba(20,27,31,${(1 - k).toFixed(3)})`);
+        botFade.addColorStop(t, `rgba(${botRGB},${(s.compact ? t : k).toFixed(3)})`);
+      }
+      ctx.fillStyle = topFade;
+      ctx.fillRect(0, 0, w, FADE);
+      ctx.fillStyle = botFade;
+      ctx.fillRect(0, h - FADE, w, FADE);
+      // (drawn beneath the title and orbs so they are never dimmed by the fade)
+
       // --- Section title ---
       // Mirror the max-w-7xl mx-auto px-margin utility used by all other sections
       // (16px on mobile, 64px from md up), scaling font sizes down on narrow canvases.
@@ -320,14 +339,15 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.font = `500 11px -apple-system,"SF Pro Text",sans-serif`;
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.28em";
       ctx.fillStyle = "rgba(143,224,220,0.65)";
-      ctx.fillText("ARSENAL", titleX, 96);
+      const ty = s.compact ? 24 : 96; // phones: no big empty band above the title
+      ctx.fillText("ARSENAL", titleX, ty);
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
       ctx.font = `700 ${headlineSize}px -apple-system,"SF Pro Display",sans-serif`;
       ctx.fillStyle = "rgba(255,239,192,0.92)";
-      ctx.fillText("What I Work With", titleX, 116);
+      ctx.fillText("What I Work With", titleX, ty + 20);
       ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
       ctx.fillStyle = "rgba(203,212,218,0.45)";
-      ctx.fillText("The tools and technologies I build with.", titleX, 116 + headlineSize + 10);
+      ctx.fillText("The tools and technologies I build with.", titleX, ty + 20 + headlineSize + 10);
       ctx.restore();
 
       // --- Skill orbs ---
@@ -442,18 +462,6 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       }
 
       // --- Edge fades: blend canvas into neighbouring sections ---
-      const topFade = ctx.createLinearGradient(0, 0, 0, 96);
-      topFade.addColorStop(0, "#141b1f");
-      topFade.addColorStop(1, "rgba(20,27,31,0)");
-      ctx.fillStyle = topFade;
-      ctx.fillRect(0, 0, w, 96);
-
-      const botFade = ctx.createLinearGradient(0, h - 96, 0, h);
-      botFade.addColorStop(0, "rgba(20,27,31,0)");
-      botFade.addColorStop(1, "#141b1f");
-      ctx.fillStyle = botFade;
-      ctx.fillRect(0, h - 96, w, 96);
-
       ctx.restore();
     }
 

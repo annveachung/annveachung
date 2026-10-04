@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
+import { fadeGradient } from "@/lib/fade";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { SkillTree } from "@/components/sections/SkillTree";
@@ -13,6 +14,26 @@ import { Footer } from "@/components/sections/Footer";
 // instead of prerendering at build time (no DB is reachable during CI build).
 export const dynamic = "force-dynamic";
 
+// Eased gradient strip between two sections (smoothstep stops — no visible
+// start/end edge even over a short distance). See lib/fade.ts.
+function Fade({ h, from, to }: { h: string; from: string; to: string }) {
+  return <div aria-hidden className={h} style={{ background: fadeGradient(from, to) }} />;
+}
+
+// Phones get a plain LINEAR strip (the colour change fills the whole height, so
+// even a short strip reads as a gradient); desktop keeps the eased one. A null
+// phoneH means the neighbouring section already blends into the colour itself.
+function FadeSplit({ phoneH, deskH, from, to }: { phoneH: string | null; deskH: string; from: string; to: string }) {
+  return (
+    <>
+      {phoneH && (
+        <div aria-hidden className={`md:hidden ${phoneH}`} style={{ background: `linear-gradient(to bottom, ${from}, ${to})` }} />
+      )}
+      <div aria-hidden className={`hidden md:block ${deskH}`} style={{ background: fadeGradient(from, to) }} />
+    </>
+  );
+}
+
 export default async function Home() {
   const data = await getSiteData();
   // Phones get a static, lightweight hero (decided server-side so the markup
@@ -25,18 +46,18 @@ export default async function Home() {
       <Navbar settings={data.settings} navLinks={data.navLinks} />
       <main>
         <Hero settings={data.settings} phone={phone} />
-        <div aria-hidden className="h-24 bg-gradient-to-b from-background to-surface-variant" />
+        <Fade h="h-16 md:h-24" from="#0d1518" to="#232b2e" />
         <SkillTree nodes={data.treeNodes} />
-        <div aria-hidden className="h-24 bg-gradient-to-b from-surface-variant to-surface-deep" />
+        <Fade h="h-16 md:h-24" from="#232b2e" to="#141b1f" />
         <Skills nodes={data.treeNodes} />
-        <div aria-hidden className="h-40 bg-gradient-to-b from-[#141b1f] to-[#232b2e]" />
+        <FadeSplit phoneH={null} deskH="h-40" from="#141b1f" to="#232b2e" />
         <GlobalMap
           settings={data.settings}
           visitedCountries={data.visitedCountries}
         />
-        <div aria-hidden className="h-40 bg-gradient-to-b from-[#232b2e] to-[#141b1f]" />
+        <FadeSplit phoneH="h-16" deskH="h-40" from="#232b2e" to="#141b1f" />
         <VisualLogs gallery={data.gallery} />
-        <div aria-hidden className="h-20 bg-gradient-to-b from-[#141b1f] to-[#232b2e]" />
+        <Fade h="h-14 md:h-20" from="#141b1f" to="#232b2e" />
         <Connect settings={data.settings} socialLinks={data.socialLinks} />
       </main>
     </div>
