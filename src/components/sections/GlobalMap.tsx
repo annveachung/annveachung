@@ -27,6 +27,7 @@ export function GlobalMap({
   const [countries, setCountries] = useState<CountryPath[]>([]);
   const [viewBox, setViewBox] = useState(`0 0 ${W} 600`);
   const [inView, setInView] = useState(false);
+  const [revealDone, setRevealDone] = useState(false);
   const [hover, setHover] = useState<Hover>(null);
 
   const visitedCodes = useMemo(
@@ -37,8 +38,9 @@ export function GlobalMap({
   // The breathing delay MUST be stable across renders — computing Math.random()
   // inline during render re-randomizes it on every mousemove, which restarts
   // every country's animation and makes them flicker.
-  const STAGGER = 0.14; // s between each visited country lighting up
-  const REVEAL_BASE = 0.6; // s transition duration
+  // Spread the whole light-up over ~4s however many countries there are.
+  const STAGGER = Math.max(0.12, Math.min(0.6, 4 / Math.max(1, visitedCountries.length)));
+  const REVEAL_BASE = 1.1; // s transition duration
   const visitedTiming = useMemo(() => {
     const m = new Map<string, { revealDelay: number; breatheDelay: number }>();
     const n = visitedCountries.length;
@@ -109,11 +111,23 @@ export function GlobalMap({
           io.disconnect();
         }
       },
-      { threshold: 0.25 },
+      { threshold: 0.1 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  // Once the light-up has finished, drop the per-country transition delays so
+  // hover effects respond instantly.
+  useEffect(() => {
+    if (!inView) return;
+    const id = setTimeout(
+      () => setRevealDone(true),
+      (visitedCountries.length * STAGGER + REVEAL_BASE + 0.3) * 1000,
+    );
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, visitedCountries.length]);
 
   return (
     <section
@@ -186,7 +200,7 @@ export function GlobalMap({
                 d={c.d}
                 className="country country--visited"
                 style={{
-                  transitionDelay: `${t?.revealDelay ?? 0}s`,
+                  transitionDelay: revealDone ? "0s" : `${t?.revealDelay ?? 0}s`,
                   animationDelay: `${t?.breatheDelay ?? 0}s`,
                 }}
                 onMouseEnter={(e) =>

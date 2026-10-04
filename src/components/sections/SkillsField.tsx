@@ -48,6 +48,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     nodes:   [] as PNode[],
     raf:     0,
     last:    0,
+    revealReq: false, // scrolled into view enough to start the entrance
+    revealT0: -1,     // timestamp the entrance started (orbs fade in one by one, once)
     w: 0, h: 0, dpr: 1,
     topBound: 0, bottomBound: 0,
     compact: false, // narrow screens: tidy grid with gentle bobbing instead of free-roaming bubbles
@@ -329,10 +331,20 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.restore();
 
       // --- Skill orbs ---
-      for (const node of nodes) {
+      // Entrance: orbs fade/scale in one after another the first time the
+      // section is scrolled into view, then stay (no replay on scroll back).
+      const T = s.revealT0 < 0 ? -1 : t - s.revealT0;
+      const STAG = Math.min(200, 2400 / Math.max(1, nodes.length));
+      for (let ni = 0; ni < nodes.length; ni++) {
+        const node = nodes[ni];
+        const rv0 = Math.max(0, Math.min(1, (T - ni * STAG) / 900));
+        if (rv0 <= 0) continue;
+        const rv = rv0 * rv0 * (3 - 2 * rv0);
+        ctx.save();
+        ctx.globalAlpha = rv;
         const c = node.tint;
         const { x, y } = node;
-        const r  = node.r;
+        const r  = node.r * (0.78 + 0.22 * rv);
 
         // Outer atmosphere halo
         const atm = ctx.createRadialGradient(x, y, r * 0.3, x, y, r * 2.9);
@@ -426,6 +438,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         }
         ctx.fillStyle = "rgba(219,228,232,0.85)";
         ctx.fillText(node.label, x, y + r + 10);
+        ctx.restore();
       }
 
       // --- Edge fades: blend canvas into neighbouring sections ---
@@ -448,9 +461,10 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     // Skip the (fairly expensive — grid-warp + physics over every node)
     // work while the canvas is scrolled off-screen, so it doesn't compete
     // with scroll compositing elsewhere on the page.
-    let visible = true;
+    let visible = false;
     function loop(t: number) {
       if (visible) {
+        if (s.revealReq && s.revealT0 < 0) s.revealT0 = t;
         physics(t);
         draw(t);
       }
@@ -461,7 +475,10 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
-    const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }, { threshold: 0 });
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (entry.intersectionRatio >= 0.15) s.revealReq = true;
+    }, { threshold: [0, 0.15] });
     io.observe(canvas);
     s.raf = requestAnimationFrame(loop);
 

@@ -134,7 +134,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
           io.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.05 },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -150,7 +150,7 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
     return () => ro.disconnect();
   }, []);
 
-  const STAGGER = 0.12;
+  const STAGGER = 0.2;
 
   return (
     <section

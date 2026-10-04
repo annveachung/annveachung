@@ -141,8 +141,9 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
           keepOnPhone(b, i) ? (
             <div
               key={i}
-              className="pointer-events-none"
+              className="pointer-events-none bubble-reveal"
               style={{
+                "--rd": `${(i * 0.05).toFixed(2)}s`,
                 position: "absolute",
                 top: `${b.top}%`,
                 left: `${b.left}%`,
@@ -151,7 +152,7 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-              }}
+              } as React.CSSProperties}
             >
               <span
                 className="bubble bubble-static flex-none"
@@ -165,8 +166,9 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
         {PHONE_EXTRAS.map((e) => (
           <div
             key={e.text}
-            className="pointer-events-none"
+            className="pointer-events-none bubble-reveal"
             style={{
+              "--rd": "0.3s",
               position: "absolute",
               top: `${e.top}%`,
               left: `${e.left}%`,
@@ -175,7 +177,7 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-            }}
+            } as React.CSSProperties}
           >
             <span
               className="bubble bubble-static flex-none"
@@ -194,8 +196,8 @@ export function FloatingLanguages({ lite = false }: { lite?: boolean }) {
       {BUBBLES.map((b, i) => (
         <div
           key={i}
-          className={`bubble-anchor pointer-events-none ${b.size < 20 ? "bubble-sm" : ""} ${(b.size < 20 && i % 6 !== 0) || (b.size >= 20 && b.size < 30 && i % 3 === 0) ? "bubble-extra" : ""}`}
-          style={{ top: `${b.top}%`, left: `${b.left}%` }}
+          className={`bubble-anchor bubble-reveal pointer-events-none ${b.size < 20 ? "bubble-sm" : ""} ${(b.size < 20 && i % 6 !== 0) || (b.size >= 20 && b.size < 30 && i % 3 === 0) ? "bubble-extra" : ""}`}
+          style={{ top: `${b.top}%`, left: `${b.left}%`, "--rd": `${(i * 0.045).toFixed(2)}s` } as React.CSSProperties}
         >
           <div
             className="bubble-float"

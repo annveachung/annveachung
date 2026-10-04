@@ -494,7 +494,8 @@ body {
   transition:
     fill 0.4s ease,
     filter 0.45s ease,
-    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 1.1s ease,
+    transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
   cursor: pointer;
 }
 
@@ -626,8 +627,8 @@ body {
   opacity: 0;
   transform: translateX(var(--slide-dir, -20px));
   transition:
-    opacity 0.55s ease,
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .skilltree.in-view .timeline-card {
   opacity: 1;
@@ -736,4 +737,19 @@ body {
 }
 .bubble-static::after {
   display: none;
+}
+
+/* Hero chips: fade in one after another on first load (plays once; nothing
+   replays when scrolling back). `backwards` fill = no lingering animation or
+   GPU layer after it finishes. */
+@keyframes chip-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.bubble-reveal {
+  animation: chip-in 0.9s ease-out backwards;
+  animation-delay: var(--rd, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bubble-reveal { animation: none; }
 }
