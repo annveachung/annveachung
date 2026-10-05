@@ -58,6 +58,28 @@ export function GlobalMap({
   const visitedCount = visitedCountries.length;
   const worldPct = Math.round((visitedCount / 177) * 100);
 
+  // Count the "% of the world" figure up from 0 while the countries light up
+  // (same duration as the staggered reveal), once, when the map scrolls in.
+  const [shownPct, setShownPct] = useState(0);
+  useEffect(() => {
+    if (!inView) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShownPct(worldPct);
+      return;
+    }
+    const duration = Math.max(1.2, visitedCount * STAGGER + REVEAL_BASE) * 1000;
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / duration);
+      setShownPct(Math.round(worldPct * (1 - (1 - p) * (1 - p)))); // ease-out
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inView, worldPct]);
+
   // Build the SVG country paths once from the local topojson.
   useEffect(() => {
     let cancelled = false;
@@ -153,8 +175,12 @@ export function GlobalMap({
             </h2>
           </div>
           <div className="text-left sm:text-right flex flex-col items-start sm:items-end pb-1">
-            <span className="section-title" style={{ marginTop: 0, color: "var(--color-secondary)" }}>
-              {worldPct}%
+            <span
+              className="section-title"
+              style={{ marginTop: 0, color: "var(--color-secondary)", fontVariantNumeric: "tabular-nums" }}
+              aria-label={`${worldPct}%`}
+            >
+              {shownPct}%
             </span>
             <span className="font-label text-[11px] tracking-[0.25em] uppercase text-on-surface-variant">
               of the world
