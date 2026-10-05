@@ -22,6 +22,7 @@ export function Connect({
         <div className="flex flex-wrap justify-center gap-2.5 sm:gap-4">
           {socialLinks.map((link) => (
             <a
+              data-reveal
               key={link.id}
               href={link.href}
               target="_blank"

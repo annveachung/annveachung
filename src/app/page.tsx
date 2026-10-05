@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
 import { SECTIONS, sectionVars } from "@/lib/sections";
 import { SectionFade } from "@/components/sections/SectionFade";
+import { RevealOnScroll } from "@/components/RevealOnScroll";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { SkillTree } from "@/components/sections/SkillTree";
@@ -41,6 +42,7 @@ export default async function Home() {
         <SectionFade from="gallery" to="network" />
         <Connect settings={data.settings} socialLinks={data.socialLinks} />
       </main>
+      <RevealOnScroll />
     </div>
   );
 }

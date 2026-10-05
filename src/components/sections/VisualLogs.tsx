@@ -20,11 +20,11 @@ export function VisualLogs({ gallery }: { gallery: SiteData["gallery"] }) {
           Paused moments from a moving life.
         </p>
       </div>
-      <div className="w-full overflow-hidden pb-2">
+      <div data-reveal className="w-full overflow-hidden pb-2">
         <div className="marquee">
           <div className="marquee-content flex">
             {items.map((img, i) => (
-              <GalleryCard key={`${img.id}-${i}`} img={img} />
+              <GalleryCard key={`${img.id}-${i}`} img={img} index={i} />
             ))}
           </div>
         </div>
