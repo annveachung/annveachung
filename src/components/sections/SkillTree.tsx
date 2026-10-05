@@ -187,13 +187,13 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
       <div className="skilltree-aurora pointer-events-none absolute inset-0" />
 
       <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-12 md:pt-16 pb-8 md:pb-10">
-        <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+        <span className="section-label">
           Progression
         </span>
-        <h2 className="font-headline font-bold text-[28px] leading-tight md:text-[40px] text-primary mt-2">
+        <h2 className="section-title">
           Where I've Been, What I've Done
         </h2>
-        <p className="text-on-surface-variant max-w-[36rem] mt-2">
+        <p className="section-sub">
           An evolving path of education, experience, and everything in between.
         </p>
       </div>

@@ -142,7 +142,8 @@ body {
   opacity: 0;
 }
 
-.glass-sweep:hover::after {
+.glass-sweep:hover::after,
+.glass-sweep.sweep-now::after { /* .sweep-now = any tap, via <TouchSweep> */
   animation: glass-sweep 680ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
@@ -753,4 +754,35 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .bubble-reveal { animation: none; }
+}
+
+/* ----------------------------------------------------------------------
+   Section headings — ONE style for every section (the Arsenal canvas mirrors
+   these numbers in SkillsField.tsx: SECTION_TYPE). Change sizes here.
+---------------------------------------------------------------------- */
+.section-label {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+.section-title {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.2;
+  color: var(--color-primary);
+}
+.section-sub {
+  margin-top: 0.5rem;
+  max-width: 36rem;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+}
+@media (min-width: 768px) {
+  .section-title { font-size: 40px; }
 }

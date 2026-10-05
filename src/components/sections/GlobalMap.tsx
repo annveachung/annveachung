@@ -145,15 +145,15 @@ export function GlobalMap({
       <div className="relative z-10 max-w-7xl mx-auto w-full px-margin-mobile md:px-margin-desktop pt-12">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+            <span className="section-label">
               Whereabouts
             </span>
-            <h2 className="font-headline font-bold text-[32px] leading-[38px] sm:text-[48px] sm:leading-[56px] text-primary mt-2">
+            <h2 className="section-title">
               The Map So Far
             </h2>
           </div>
           <div className="text-left sm:text-right flex flex-col items-start sm:items-end pb-1">
-            <span className="font-headline font-bold text-[32px] leading-[38px] sm:text-[48px] sm:leading-[52px] text-secondary">
+            <span className="section-title" style={{ marginTop: 0, color: "var(--color-secondary)" }}>
               {worldPct}%
             </span>
             <span className="font-label text-[11px] tracking-[0.25em] uppercase text-on-surface-variant">
@@ -161,7 +161,7 @@ export function GlobalMap({
             </span>
           </div>
         </div>
-        <p className="text-on-surface-variant max-w-[36rem] mt-2">A growing record of countries explored and horizons chased.</p>
+        <p className="section-sub">A growing record of countries explored and horizons chased.</p>
       </div>
 
       {/* Map */}

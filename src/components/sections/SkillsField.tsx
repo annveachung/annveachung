@@ -20,6 +20,13 @@ const PAL: Tint[] = HEXES.map((hex) => {
 
 // --- Physics constants --------------------------------------------------
 const SPEED   = 0.55;    // base drift speed (px per 60fps tick)
+// Section heading sizes (see .section-title / .section-sub in globals.css) —
+// the HTML heading overlaid in Skills.tsx occupies this space at the top, so
+// the orbs are laid out below it.
+const SECTION_TYPE = {
+  title: (w: number) => (w < 768 ? 28 : 40),
+  sub: 16,
+};
 const SIGMA   = 120;     // Gaussian sigma for field wells
 
 function hash(str: string) {
@@ -86,8 +93,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       // node CENTER, so it must add back the orb's own radius (plus some
       // buffer for the soft atmosphere-halo bleed) — otherwise a node's
       // visible top edge (y - r) still reaches above the text.
-      const headlineSize = w < 480 ? 24 : w < 768 ? 30 : 40;
-      const titleBottom = 116 + headlineSize + 10 + (w < 640 ? 12 : 13) + 24;
+      const headlineSize = SECTION_TYPE.title(w);
+      const titleBottom = 116 + headlineSize + 16 + SECTION_TYPE.sub + 24;
       const yTop = Math.min(titleBottom + r, h * 0.55);
       const yBottom = h - r - 40;
 
@@ -139,8 +146,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     function compactLayout(w: number): number {
       const n = skills.length;
       const cols = w < 340 ? 2 : 3;
-      const headlineSize = w < 480 ? 24 : 30;
-      const titleBottom = 44 + headlineSize + 10 + 12 + 24; // compact: title sits close to the top
+      const headlineSize = SECTION_TYPE.title(w);
+      const titleBottom = 44 + headlineSize + 16 + SECTION_TYPE.sub + 24; // compact: title sits close to the top
       const colW = (w - 32) / cols;
       const r = Math.max(26, Math.min(36, Math.floor(colW * 0.3)));
       const rowH = r * 2 + 44;
@@ -343,30 +350,8 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.fillRect(0, h - FADE, w, FADE);
       // (drawn beneath the title and orbs so they are never dimmed by the fade)
 
-      // --- Section title ---
-      // Mirror the max-w-7xl mx-auto px-margin utility used by all other sections
-      // (16px on mobile, 64px from md up), scaling font sizes down on narrow canvases.
-      const isMobile = w < 640;
-      const margin = w < 768 ? 16 : Math.max(64, (w - 1280) / 2 + 64);
-      const titleX = margin;
-      const headlineSize = w < 480 ? 24 : w < 768 ? 30 : 40;
-      const bodySize = isMobile ? 12 : 13;
-      ctx.save();
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      ctx.font = `500 11px -apple-system,"SF Pro Text",sans-serif`;
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.28em";
-      ctx.fillStyle = "rgba(143,224,220,0.65)";
-      const ty = s.compact ? 24 : 96; // phones: no big empty band above the title
-      ctx.fillText("ARSENAL", titleX, ty);
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0";
-      ctx.font = `700 ${headlineSize}px -apple-system,"SF Pro Display",sans-serif`;
-      ctx.fillStyle = "rgba(255,239,192,0.92)";
-      ctx.fillText("What I Work With", titleX, ty + 20);
-      ctx.font = `400 ${bodySize}px -apple-system,"SF Pro Text",sans-serif`;
-      ctx.fillStyle = "rgba(203,212,218,0.45)";
-      ctx.fillText("The tools and technologies I build with.", titleX, ty + 20 + headlineSize + 10);
-      ctx.restore();
+      // (The "Arsenal / What I Work With" heading is real HTML laid over the
+      // canvas in Skills.tsx, so it renders exactly like every other section.)
 
       // --- Skill orbs ---
       // Entrance: orbs fade/scale in one after another the first time the

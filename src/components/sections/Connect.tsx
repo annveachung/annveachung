@@ -1,4 +1,5 @@
 import type { SiteData } from "@/lib/data";
+import { TouchSweep } from "@/components/TouchSweep";
 
 export function Connect({
   settings,
@@ -9,13 +10,14 @@ export function Connect({
 }) {
   return (
     <section id="contact" className="glass-sweep bg-[var(--sec-network)] w-full pt-5 pb-10 scroll-mt-20">
+      <TouchSweep />
       <div className="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
-          <span className="font-label text-[11px] tracking-[0.3em] uppercase text-secondary">
+          <span className="section-label">
             Network
           </span>
-          <h2 className="font-headline font-bold text-2xl text-primary mt-2">Ping Me</h2>
-          <p className="text-on-surface-variant text-sm">Low effort. High approval rate.</p>
+          <h2 className="section-title">Ping Me</h2>
+          <p className="section-sub">Low effort. High approval rate.</p>
         </div>
         <div className="flex flex-wrap justify-center gap-4">
           {socialLinks.map((link) => (
