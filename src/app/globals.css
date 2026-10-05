@@ -630,7 +630,8 @@ body {
     opacity 0.9s ease,
     transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.skilltree.in-view .timeline-card {
+/* Each card is revealed individually by SkillTree's IntersectionObserver. */
+.timeline-card.is-shown {
   opacity: 1;
   transform: translateX(0);
 }

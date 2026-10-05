@@ -41,11 +41,9 @@ function StatusBadge({ status }: { status: string }) {
 function TimelineCard({
   node,
   side,
-  delay,
 }: {
   node: Node;
   side: "left" | "right";
-  delay: number;
 }) {
   const isLeft = side === "left";
   const borderColor = isLeft
@@ -60,7 +58,6 @@ function TimelineCard({
   const card = (
     <div
       className={`timeline-card timeline-card--${side} relative flex-1 bg-charcoal/70 backdrop-blur-md border ${borderColor} ${hoverGlow} rounded-md cursor-pointer transition-all duration-300`}
-      style={{ transitionDelay: `${delay}s` }}
     >
       <div className={`timeline-accent ${topAccent} h-[3px] rounded-t-md opacity-60`} />
       <div className="px-4 py-3">
@@ -140,6 +137,36 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
     return () => io.disconnect();
   }, []);
 
+  // Cards reveal one by one as each scrolls into view (once — they stay
+  // visible afterwards). Cards that enter together are staggered in reading
+  // order: top to bottom, left column before right.
+  useEffect(() => {
+    const root = containerRef.current;
+    if (!root) return;
+    const STAGGER = 0.18; // s between cards entering in the same batch
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entering = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) =>
+            a.boundingClientRect.top - b.boundingClientRect.top ||
+            a.boundingClientRect.left - b.boundingClientRect.left,
+          );
+        entering.forEach((e, k) => {
+          const card = e.target as HTMLElement;
+          card.style.transitionDelay = `${k * STAGGER}s`;
+          card.classList.add("is-shown");
+          io.unobserve(card);
+          // Drop the stagger once revealed so hover in/out stays instant.
+          setTimeout(() => { card.style.transitionDelay = ""; }, (k * STAGGER + 1) * 1000);
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -8% 0px" },
+    );
+    root.querySelectorAll(".timeline-card").forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, [nodes]);
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -150,7 +177,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
     return () => ro.disconnect();
   }, []);
 
-  const STAGGER = 0.2;
 
   return (
     <section
@@ -203,7 +229,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
                 key={n.id}
                 node={n}
                 side="left"
-                delay={i * STAGGER}
               />
             ))}
           </div>
@@ -246,7 +271,6 @@ export function SkillTree({ nodes }: { nodes: Node[] }) {
                 key={n.id}
                 node={n}
                 side="right"
-                delay={i * STAGGER + 0.06}
               />
             ))}
           </div>
