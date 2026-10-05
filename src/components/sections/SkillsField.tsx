@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import type { SiteData } from "@/lib/data";
+import { addCanvasFadeStops } from "@/lib/fade";
+import { CANVAS_EDGES, SECTIONS, transition } from "@/lib/sections";
 
 type TreeNode = SiteData["treeNodes"][number] & { glyph?: { path: string; stroke: boolean } | null };
 
@@ -252,7 +254,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
       // Background
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = "#141b1f";
+      ctx.fillStyle = SECTIONS.arsenal;
       ctx.fillRect(0, 0, w, h);
 
       // Aurora blobs (match site palette)
@@ -306,19 +308,17 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
         ctx.stroke();
       }
 
-      // Edge fades (eased, so they read as a smooth gradient even when short —
-      // phones use a shorter one because the title sits closer to the top).
-      // On phones the bottom edge fades straight into the Whereabouts colour
-      // (#232b2e), linearly, so the section hand-off is one short gradient.
-      const FADE = s.compact ? 64 : 96;
-      const botRGB = s.compact ? "35,43,46" : "20,27,31";
+      // Edge fades — colours, heights and easing come from lib/sections.ts.
+      // Top fades from the Arsenal colour; the bottom blends into the next
+      // section's colour when there is no strip below on this layout.
+      const edge = s.compact ? CANVAS_EDGES.phone : CANVAS_EDGES.desktop;
+      const below = transition("arsenal", "whereabouts")[s.compact ? "phone" : "desktop"];
+      const botColor = below.height === 0 ? SECTIONS.whereabouts : SECTIONS.arsenal;
+      const FADE = edge.height;
       const topFade = ctx.createLinearGradient(0, 0, 0, FADE);
       const botFade = ctx.createLinearGradient(0, h - FADE, 0, h);
-      for (let i = 0; i <= 8; i++) {
-        const t = i / 8, k = t * t * (3 - 2 * t);
-        topFade.addColorStop(t, `rgba(20,27,31,${(1 - k).toFixed(3)})`);
-        botFade.addColorStop(t, `rgba(${botRGB},${(s.compact ? t : k).toFixed(3)})`);
-      }
+      addCanvasFadeStops(topFade, SECTIONS.arsenal, 1, 0, edge.ease);
+      addCanvasFadeStops(botFade, botColor, 0, 1, edge.ease);
       ctx.fillStyle = topFade;
       ctx.fillRect(0, 0, w, FADE);
       ctx.fillStyle = botFade;

@@ -133,7 +133,7 @@ export function GlobalMap({
     <section
       ref={sectionRef}
       id="nodes"
-      className={`worldmap relative w-full bg-surface-variant overflow-hidden scroll-mt-32 ${
+      className={`worldmap relative w-full bg-[var(--sec-whereabouts)] overflow-hidden scroll-mt-32 ${
         inView ? "in-view" : ""
       }`}
       onMouseLeave={() => setHover(null)}

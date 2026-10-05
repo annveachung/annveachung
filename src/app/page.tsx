@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
-import { fadeGradient } from "@/lib/fade";
+import { sectionVars } from "@/lib/sections";
+import { SectionFade } from "@/components/sections/SectionFade";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { SkillTree } from "@/components/sections/SkillTree";
@@ -14,26 +15,6 @@ import { Footer } from "@/components/sections/Footer";
 // instead of prerendering at build time (no DB is reachable during CI build).
 export const dynamic = "force-dynamic";
 
-// Eased gradient strip between two sections (smoothstep stops — no visible
-// start/end edge even over a short distance). See lib/fade.ts.
-function Fade({ h, from, to }: { h: string; from: string; to: string }) {
-  return <div aria-hidden className={h} style={{ background: fadeGradient(from, to) }} />;
-}
-
-// Phones get a plain LINEAR strip (the colour change fills the whole height, so
-// even a short strip reads as a gradient); desktop keeps the eased one. A null
-// phoneH means the neighbouring section already blends into the colour itself.
-function FadeSplit({ phoneH, deskH, from, to }: { phoneH: string | null; deskH: string; from: string; to: string }) {
-  return (
-    <>
-      {phoneH && (
-        <div aria-hidden className={`md:hidden ${phoneH}`} style={{ background: `linear-gradient(to bottom, ${from}, ${to})` }} />
-      )}
-      <div aria-hidden className={`hidden md:block ${deskH}`} style={{ background: fadeGradient(from, to) }} />
-    </>
-  );
-}
-
 export default async function Home() {
   const data = await getSiteData();
   // Phones get a static, lightweight hero (decided server-side so the markup
@@ -42,22 +23,22 @@ export default async function Home() {
   const phone = /iPhone|iPod|Android.+Mobile|Windows Phone/i.test(ua);
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen" style={sectionVars() as React.CSSProperties}>
       <Navbar settings={data.settings} navLinks={data.navLinks} />
       <main>
         <Hero settings={data.settings} phone={phone} />
-        <Fade h="h-16 md:h-24" from="#0d1518" to="#232b2e" />
+        <SectionFade from="hero" to="progression" />
         <SkillTree nodes={data.treeNodes} />
-        <Fade h="h-16 md:h-24" from="#232b2e" to="#141b1f" />
+        <SectionFade from="progression" to="arsenal" />
         <Skills nodes={data.treeNodes} />
-        <FadeSplit phoneH={null} deskH="h-40" from="#141b1f" to="#232b2e" />
+        <SectionFade from="arsenal" to="whereabouts" />
         <GlobalMap
           settings={data.settings}
           visitedCountries={data.visitedCountries}
         />
-        <FadeSplit phoneH="h-16" deskH="h-40" from="#232b2e" to="#141b1f" />
+        <SectionFade from="whereabouts" to="gallery" />
         <VisualLogs gallery={data.gallery} />
-        <Fade h="h-14 md:h-20" from="#141b1f" to="#232b2e" />
+        <SectionFade from="gallery" to="network" />
         <Connect settings={data.settings} socialLinks={data.socialLinks} />
       </main>
     </div>

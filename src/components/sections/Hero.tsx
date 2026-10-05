@@ -1,6 +1,7 @@
 import type { SiteData } from "@/lib/data";
 import { FloatingLanguages } from "@/components/sections/FloatingLanguages";
 import { fadeToOpaque } from "@/lib/fade";
+import { HERO_BOTTOM_FADE, SECTIONS } from "@/lib/sections";
 import { PacmanHero } from "@/components/sections/PacmanHero";
 
 export function Hero({ settings, phone = false }: { settings: SiteData["settings"]; phone?: boolean }) {
@@ -16,8 +17,8 @@ export function Hero({ settings, phone = false }: { settings: SiteData["settings
           background, so there is no step where the hero meets the next strip. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 z-[6]"
-        style={{ background: fadeToOpaque("#0d1518") }}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6]"
+        style={{ height: HERO_BOTTOM_FADE, background: fadeToOpaque(SECTIONS.hero) }}
       />
 
       {/* Centered hero identity */}

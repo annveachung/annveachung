@@ -228,7 +228,7 @@ body {
   background:
     radial-gradient(circle at top right, rgba(143, 224, 220, 0.08) 0%, transparent 50%),
     radial-gradient(circle at bottom left, rgba(255, 239, 192, 0.05) 0%, transparent 40%),
-    var(--color-background);
+    var(--sec-hero, var(--color-background));
 }
 
 .marquee {
@@ -579,7 +579,7 @@ body {
 
 /* Tone A: Living CV */
 .skilltree {
-  background-color: var(--color-surface-variant);
+  background-color: var(--sec-progression);
 }
 
 /* Faint aurora behind the section (<8% opacity). */
@@ -668,12 +668,12 @@ body {
 
 /* Tone B: Skills */
 .skills-section {
-  background-color: var(--color-surface-deep);
+  background-color: var(--sec-arsenal);
 }
 
 /* Tone B: Visual Logs — darker, alternates with Map (Tone A) */
 .visual-logs {
-  background-color: #141b1f;
+  background-color: var(--sec-gallery);
 }
 
 @keyframes skills-aurora {
