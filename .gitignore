@@ -45,3 +45,6 @@ Thumbs.db
 
 # TypeScript incremental build cache
 tsconfig.tsbuildinfo
+
+# Next.js generated type references (rewritten by dev/build)
+next-env.d.ts
