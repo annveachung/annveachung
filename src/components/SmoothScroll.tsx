@@ -51,6 +51,12 @@ export function SmoothScroll() {
       const el = document.getElementById(id);
       if (el) snap.addElement(el, { align: ["start"] });
     }
+    // Snap point at the very bottom (Network section's end). Without it, a
+    // short last section sits within the proximity range of the Gallery's
+    // snap point, so resting near the bottom pulled you back up and you could
+    // never reach the end of the page.
+    const last = document.getElementById("contact");
+    if (last) snap.addElement(last, { align: ["end"] });
 
     let raf = 0;
     const loop = (time: number) => {
