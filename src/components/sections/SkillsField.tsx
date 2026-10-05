@@ -281,22 +281,30 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       ctx.fillStyle = vg; ctx.fillRect(0, 0, w, h);
 
       // --- Deformable line grid (convex spacetime curvature) ---
-      const GX = 36, GY = 22;
+      // Phones: roughly square ~30px cells (the tall canvas otherwise stretched
+      // them). Lines are drawn PAD cells beyond every edge so that when nodes
+      // pull the grid inward there is never a bare strip — the field always
+      // reaches the canvas edges.
+      const GX = s.compact ? Math.max(8, Math.round(w / 30)) : 36;
+      const GY = s.compact ? Math.max(8, Math.round(h / 30)) : 22;
       const cw = w / GX, ch = h / GY;
+      const PAD = s.compact ? 3 : 0; // desktop unchanged
       const STEPS_H = s.compact ? 36 : 72;
-      const STEPS_V = s.compact ? 24 : 46;
+      const STEPS_V = s.compact ? Math.max(24, GY * 2) : 46;
+      const x0 = -PAD * cw, x1 = w + PAD * cw;
+      const y0 = -PAD * ch, y1 = h + PAD * ch;
 
       ctx.lineWidth = 0.65;
 
       // Horizontal lines
-      for (let iy = 0; iy <= GY; iy++) {
+      for (let iy = -PAD; iy <= GY + PAD; iy++) {
         const byBase = iy * ch;
         let prox = 0;
         for (const n of nodes) { const dy = byBase - n.y; prox += 0.88 * Math.exp(-dy*dy / (2*SIGMA*SIGMA)); }
         ctx.strokeStyle = `rgba(155,210,222,${Math.min(0.10, 0.055 + prox * 0.028).toFixed(3)})`;
         ctx.beginPath();
         for (let si = 0; si <= STEPS_H; si++) {
-          const bx = (si / STEPS_H) * w;
+          const bx = x0 + (si / STEPS_H) * (x1 - x0);
           const [dx, dy] = gridDisplace(bx, byBase, t);
           si === 0 ? ctx.moveTo(bx + dx, byBase + dy) : ctx.lineTo(bx + dx, byBase + dy);
         }
@@ -304,14 +312,14 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       }
 
       // Vertical lines
-      for (let ix = 0; ix <= GX; ix++) {
+      for (let ix = -PAD; ix <= GX + PAD; ix++) {
         const bxBase = ix * cw;
         let prox = 0;
         for (const n of nodes) { const dx = bxBase - n.x; prox += 0.88 * Math.exp(-dx*dx / (2*SIGMA*SIGMA)); }
         ctx.strokeStyle = `rgba(155,210,222,${Math.min(0.10, 0.055 + prox * 0.028).toFixed(3)})`;
         ctx.beginPath();
         for (let si = 0; si <= STEPS_V; si++) {
-          const by = (si / STEPS_V) * h;
+          const by = y0 + (si / STEPS_V) * (y1 - y0);
           const [dx, dy] = gridDisplace(bxBase, by, t);
           si === 0 ? ctx.moveTo(bxBase + dx, by + dy) : ctx.lineTo(bxBase + dx, by + dy);
         }
