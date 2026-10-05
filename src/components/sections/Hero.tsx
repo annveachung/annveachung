@@ -4,7 +4,7 @@ import { fadeToOpaque } from "@/lib/fade";
 import { HERO_BOTTOM_FADE, SECTIONS } from "@/lib/sections";
 import { PacmanHero } from "@/components/sections/PacmanHero";
 
-export function Hero({ settings, phone = false }: { settings: SiteData["settings"]; phone?: boolean }) {
+export function Hero({ settings, phone = false, bg = SECTIONS.hero }: { settings: SiteData["settings"]; phone?: boolean; bg?: string }) {
   return (
     <section className="nocturnal-gradient relative min-h-screen flex items-center justify-center overflow-hidden px-margin-mobile md:px-margin-desktop">
       {/* Packed field of floating greeting bubbles filling the hero */}
@@ -18,7 +18,7 @@ export function Hero({ settings, phone = false }: { settings: SiteData["settings
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[6]"
-        style={{ height: HERO_BOTTOM_FADE, background: fadeToOpaque(SECTIONS.hero) }}
+        style={{ height: HERO_BOTTOM_FADE, background: fadeToOpaque(bg) }}
       />
 
       {/* Centered hero identity */}

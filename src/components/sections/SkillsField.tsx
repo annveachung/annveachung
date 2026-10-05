@@ -159,6 +159,16 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       return Math.ceil(y0 + (rows - 1) * rowH + rowH * 0.22 + r + 36 + 14);
     }
 
+    // Section colours come from the --sec-* CSS variables on the page (so a
+    // ?alt= preview recolours the canvas too); fall back to lib/sections.ts.
+    const colors = { arsenal: SECTIONS.arsenal as string, whereabouts: SECTIONS.whereabouts as string };
+    let colorTick = 0;
+    function readColors() {
+      const cs = getComputedStyle(canvas);
+      colors.arsenal = cs.getPropertyValue("--sec-arsenal").trim() || SECTIONS.arsenal;
+      colors.whereabouts = cs.getPropertyValue("--sec-whereabouts").trim() || SECTIONS.whereabouts;
+    }
+
     function resize() {
       const rect = canvas.getBoundingClientRect();
       const w = rect.width;
@@ -254,7 +264,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
 
       // Background
       ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = SECTIONS.arsenal;
+      ctx.fillStyle = colors.arsenal;
       ctx.fillRect(0, 0, w, h);
 
       // Aurora blobs (match site palette)
@@ -313,11 +323,11 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
       // section's colour when there is no strip below on this layout.
       const edge = s.compact ? CANVAS_EDGES.phone : CANVAS_EDGES.desktop;
       const below = transition("arsenal", "whereabouts")[s.compact ? "phone" : "desktop"];
-      const botColor = below.height === 0 ? SECTIONS.whereabouts : SECTIONS.arsenal;
+      const botColor = below.height === 0 ? colors.whereabouts : colors.arsenal;
       const FADE = edge.height;
       const topFade = ctx.createLinearGradient(0, 0, 0, FADE);
       const botFade = ctx.createLinearGradient(0, h - FADE, 0, h);
-      addCanvasFadeStops(topFade, SECTIONS.arsenal, 1, 0, edge.ease);
+      addCanvasFadeStops(topFade, colors.arsenal, 1, 0, edge.ease);
       addCanvasFadeStops(botFade, botColor, 0, 1, edge.ease);
       ctx.fillStyle = topFade;
       ctx.fillRect(0, 0, w, FADE);
@@ -472,6 +482,7 @@ export function SkillsField({ skills }: { skills: TreeNode[] }) {
     let visible = false;
     function loop(t: number) {
       if (visible) {
+        if (colorTick++ % 30 === 0) readColors();
         if (s.revealReq && s.revealT0 < 0) s.revealT0 = t;
         physics(t);
         draw(t);

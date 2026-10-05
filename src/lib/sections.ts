@@ -8,15 +8,17 @@ export type Ease = "eased" | "linear";
 
 // --- Section background colours (top to bottom) ---------------------------
 export const SECTIONS = {
-  hero: "#0d1518",
-  progression: "#232b2e",
-  arsenal: "#141b1f",
-  whereabouts: "#232b2e",
-  gallery: "#141b1f",
-  network: "#232b2e",
+  // "Ink & Soft graphite": A = ink, B = soft graphite.
+  hero: "#0d1016",
+  progression: "#171c24",
+  arsenal: "#0d1016",
+  whereabouts: "#171c24",
+  gallery: "#0d1016",
+  network: "#171c24",
 } as const;
 
 export type SectionKey = keyof typeof SECTIONS;
+export type Palette = Record<SectionKey, string>;
 
 // --- Transitions between neighbouring sections -----------------------------
 // `phone` applies below the md breakpoint (768px), `desktop` from md up.
@@ -58,8 +60,8 @@ export const CANVAS_EDGES = {
 
 // CSS custom properties (--sec-hero, --sec-progression, …) set once on the page
 // wrapper; section styles use var(--sec-…) so they follow this file.
-export function sectionVars(): Record<string, string> {
+export function sectionVars(palette: Palette = SECTIONS): Record<string, string> {
   return Object.fromEntries(
-    Object.entries(SECTIONS).map(([k, v]) => [`--sec-${k}`, v]),
+    Object.entries(palette).map(([k, v]) => [`--sec-${k}`, v]),
   );
 }

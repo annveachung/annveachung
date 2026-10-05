@@ -24,7 +24,7 @@ html.lenis body {
    utilities like bg-background / text-primary / font-headline-xl work.
 ---------------------------------------------------------------------- */
 @theme {
-  --color-background: #0d1518;
+  --color-background: #0d1016; /* matches the hero/ink section colour */
   --color-surface: #151d20;
   --color-surface-variant: #232b2e;
   --color-primary: #ffefc0; /* pastel buttery yellow */
@@ -373,8 +373,8 @@ body {
 .hero-scrim {
   background: radial-gradient(
     ellipse at center,
-    rgba(13, 21, 24, 0.92) 0%,
-    rgba(13, 21, 24, 0.72) 42%,
+    color-mix(in srgb, var(--sec-hero, #0d1016) 92%, transparent) 0%,
+    color-mix(in srgb, var(--sec-hero, #0d1016) 72%, transparent) 42%,
     transparent 72%
   );
 }
@@ -474,8 +474,8 @@ body {
 
 /* Country base paths */
 .country {
-  fill: #1b2327; /* very dark gray — blends into the background */
-  stroke: #232b2e;
+  fill: rgba(0, 0, 0, 0.22); /* darker tint of whatever the section colour is */
+  stroke: var(--sec-whereabouts, #171c24);
   stroke-width: 0.35;
   vector-effect: non-scaling-stroke;
   transition:
@@ -572,8 +572,8 @@ body {
 /*
   Alternating section tones — all fade transparent at edges so sections bleed
   into each other rather than cutting hard:
-    Tone A — surface-variant #232b2e — Living CV, Visual Logs
-    Tone B — mid-dark #141b1f       — Skills
+    Section colours now live in src/lib/sections.ts (exposed as --sec-* vars):
+    ink #0d1016 — hero / Arsenal / Gallery; soft graphite #171c24 — the rest
     GlobalMap keeps its own bg-midnight treatment
 */
 

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
-import { sectionVars } from "@/lib/sections";
+import { SECTIONS, sectionVars } from "@/lib/sections";
 import { SectionFade } from "@/components/sections/SectionFade";
 import { Navbar } from "@/components/sections/Navbar";
 import { Hero } from "@/components/sections/Hero";
@@ -23,7 +23,7 @@ export default async function Home() {
   const phone = /iPhone|iPod|Android.+Mobile|Windows Phone/i.test(ua);
 
   return (
-    <div className="bg-background min-h-screen" style={sectionVars() as React.CSSProperties}>
+    <div className="min-h-screen" style={{ ...sectionVars(), background: SECTIONS.hero } as React.CSSProperties}>
       <Navbar settings={data.settings} navLinks={data.navLinks} />
       <main>
         <Hero settings={data.settings} phone={phone} />

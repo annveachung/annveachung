@@ -1,11 +1,11 @@
 import { fadeGradient } from "@/lib/fade";
-import { SECTIONS, transition, type SectionKey } from "@/lib/sections";
+import { SECTIONS, transition, type Palette, type SectionKey } from "@/lib/sections";
 
 // Gradient strip between two sections. Colours, heights and easing come from
 // lib/sections.ts — edit them there, not here.
-export function SectionFade({ from, to }: { from: SectionKey; to: SectionKey }) {
+export function SectionFade({ from, to, palette = SECTIONS }: { from: SectionKey; to: SectionKey; palette?: Palette }) {
   const { phone, desktop } = transition(from, to);
-  const a = SECTIONS[from], b = SECTIONS[to];
+  const a = palette[from], b = palette[to];
   return (
     <>
       {phone.height > 0 && (
