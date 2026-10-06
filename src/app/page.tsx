@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { getSiteData } from "@/lib/data";
 import { SECTIONS, sectionVars } from "@/lib/sections";
@@ -15,6 +16,10 @@ import { Footer } from "@/components/sections/Footer";
 // This page reads live data from the database, so render it per request
 // instead of prerendering at build time (no DB is reachable during CI build).
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function Home() {
   const data = await getSiteData();

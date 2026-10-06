@@ -59,10 +59,24 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
+const SITE_NAME = "Annvea's Web";
+const SITE_DESCRIPTION =
+  "Architecting immersive digital experiences at the intersection of technical precision and artistic whimsy.";
+
 export const metadata: Metadata = {
-  title: "Annvea Chung's Web",
-  description:
-    "Architecting immersive digital experiences at the intersection of technical precision and artistic whimsy.",
+  // Resolves relative metadata URLs (canonical, og:url) against the live
+  // host, so search engines index annvea.com rather than www or old domains.
+  metadataBase: new URL("https://annvea.com"),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({
