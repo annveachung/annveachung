@@ -1,6 +1,6 @@
 # Annvea's Web
 
-My personal site, live at **[annvea.com](https://annvea.com)**.
+My personal site, live at **[annvea.com](https://annvea.com)** (moved from annveachung.com in October 2026).
 
 Built with Next.js, React, Prisma (PostgreSQL) and Auth.js, with an admin
 panel for managing the gallery, travel map and skills.
